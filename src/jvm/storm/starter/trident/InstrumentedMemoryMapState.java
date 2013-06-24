@@ -4,17 +4,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import storm.trident.state.State;
 import storm.trident.state.StateFactory;
 import storm.trident.state.ValueUpdater;
 import storm.trident.testing.MemoryMapState;
 import backtype.storm.task.IMetricsContext;
+import backtype.storm.utils.Utils;
 
 public class InstrumentedMemoryMapState<T> extends MemoryMapState<T> {
 
-	static Logger LOG = Logger.getLogger(InstrumentedMemoryMapState.class);
+	static final Logger LOG = LoggerFactory
+			.getLogger(InstrumentedMemoryMapState.class);
 
 	public InstrumentedMemoryMapState(String id) {
 		super(id);
@@ -23,27 +26,27 @@ public class InstrumentedMemoryMapState<T> extends MemoryMapState<T> {
 	@Override
 	public List<T> multiUpdate(List<List<Object>> keys,
 			List<ValueUpdater> updaters) {
-		System.out.println(String.format(
-				"InstrumentedMemoryMapState| multiUpdate | ..."
-						+ "  \tupdating\t%s\t%s", keys.size(), updaters));
+		LOG.trace(Utils.logString("InstrumentedMemoryMapState", "multiUpdate",
+				"updating", "key size", "" + keys.size(), "payload",
+				updaters.toString()));
 		return super.multiUpdate(keys, updaters);
 	}
 
 	@Override
 	public void multiPut(List<List<Object>> keys, List<T> vals) {
+		LOG.trace(Utils.logString("InstrumentedMemoryMapState", "multiPut",
+				"updating", "key size", "" + keys.size(), "payload",
+				vals.toString()));
 
-		System.out.println(String.format(
-				"InstrumentedMemoryMapState| multiPut |..."
-						+ "  \twriting\t%s\t%s", keys.size(), vals));
-		System.out.println("get");
 		super.multiPut(keys, vals);
 	}
 
 	@Override
 	public List<T> multiGet(List<List<Object>> keys) {
-		System.out.println(String.format(
-				"InstrumentedMemoryMapState | multiGet |..."
-						+ "  \tgetting\t%s\t", keys.size()));
+
+		LOG.trace(Utils.logString("InstrumentedMemoryMapState", "multiPut",
+				"updating", "key size", "" + keys.size(), "payload",
+				keys.toString()));
 		return super.multiGet(keys);
 	}
 
