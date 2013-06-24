@@ -20,7 +20,7 @@
                  ]
 
   :profiles {:dev
-              {:dependencies [[storm/storm-core "0.9.0-wip19-idea"]
+              {:dependencies [[storm/storm-core "0.9.0-wip19"]
                               [storm/storm-kafka "0.9.0-wip16a-scala292"]
                               [junit/junit "3.8.1" :scope "test" ]
                               [org.testng/testng "6.8" ]

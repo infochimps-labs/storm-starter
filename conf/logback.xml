@@ -14,9 +14,9 @@
 
 
     <appender name="S" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>storm.log</file>
+        <file>/tmp/storm.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-            <fileNamePattern>/tmp/storm.log.%i</fileNamePattern>
+            <fileNamePattern>storm.log.%i</fileNamePattern>
             <minIndex>1</minIndex>
             <maxIndex>9</maxIndex>
         </rollingPolicy>
@@ -31,9 +31,9 @@
     </appender>
 
     <appender name="Q" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>queue.log</file>
+        <file>/tmp/queue.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-            <fileNamePattern>/tmp/queue.log.%i</fileNamePattern>
+            <fileNamePattern>queue.log.%i</fileNamePattern>
             <minIndex>1</minIndex>
             <maxIndex>9</maxIndex>
         </rollingPolicy>
