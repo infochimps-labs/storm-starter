@@ -2,24 +2,31 @@ package storm.starter.trident;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import storm.trident.operation.TridentCollector;
 import storm.trident.testing.FixedBatchSpout;
 import backtype.storm.tuple.Fields;
+import backtype.storm.utils.Utils;
 
 public class InstrumentedFixedBatchSpout extends FixedBatchSpout {
 
+	static final Logger LOG = LoggerFactory
+			.getLogger(InstrumentedFixedBatchSpout.class);
+
 	@Override
 	public void emitBatch(long batchId, TridentCollector collector) {
-		// TODO Auto-generated method stub
-		System.out.println("InstrumentedFixedBatchSpout| emitBatch | msgId : "
-				+ batchId);
+
+		LOG.trace(Utils.logString("InstrumentedFixedBatchSpout", "emitBatch",
+				"", "", "msgId", "" + batchId));
 		super.emitBatch(batchId, collector);
 	}
 
 	@Override
 	public void ack(long batchId) {
-		System.out.println("InstrumentedFixedBatchSpout| ack | msgId :"
-				+ batchId);
+		LOG.trace(Utils.logString("InstrumentedFixedBatchSpout", "ack", "", "",
+				"msgId", "" + batchId));
 		super.ack(batchId);
 	}
 

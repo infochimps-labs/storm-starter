@@ -1,7 +1,7 @@
 (defproject storm-starter "0.0.1-SNAPSHOT"
   :source-paths ["src/clj"]
   :java-source-paths ["src/jvm"]
-  :resource-paths ["multilang"]
+  :resource-paths ["multilang" "conf"]
   :aot :all
   :repositories {
 ;;                 "twitter4j" "http://twitter4j.org/maven2"
@@ -14,7 +14,7 @@
                  ]
 
   :profiles {:dev
-              {:dependencies [[storm "0.8.2"]
+              {:dependencies [[storm/storm-core "0.9.0-wip19-idea"]
                               [org.clojure/clojure "1.4.0"]]}}
   :min-lein-version "2.0.0"
   )
