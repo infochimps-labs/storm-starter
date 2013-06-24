@@ -1,3 +1,5 @@
+.settings
+.lein*
 classes/
 lib/
 target/
