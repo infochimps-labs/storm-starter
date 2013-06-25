@@ -5,7 +5,6 @@ import storm.trident.TridentTopology;
 import storm.trident.operation.BaseFunction;
 import storm.trident.operation.TridentCollector;
 import storm.trident.operation.builtin.Count;
-import storm.trident.testing.FixedBatchSpout;
 import storm.trident.tuple.TridentTuple;
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;
@@ -29,9 +28,10 @@ public class TridentWordCount {
     }
 
     public static StormTopology buildTopology(LocalDRPC drpc) {
-        FixedBatchSpout spout = new InstrumentedFixedBatchSpout(new Fields(
-                "sentence"), 10, new Values("the cow jumped over the moon"),
-                new Values("the man went to the store and bought some candy"),
+        InstrumentedFixedBatchSpout spout = new InstrumentedFixedBatchSpout(
+                new Fields("sentence"), 10, new Values(
+                        "the cow jumped over the moon"), new Values(
+                        "the man went to the store and bought some candy"),
                 new Values("four score and seven years ago"), new Values(
                         "how many apples can you eat"), new Values(
                         "to be or not to be the person"));
@@ -58,6 +58,7 @@ public class TridentWordCount {
     }
 
     public static void main(String[] args) throws Exception {
+
         Config conf = new Config();
         conf.setMaxSpoutPending(3);
         // conf.put(Config.TOPOLOGY_SLEEP_SPOUT_WAIT_STRATEGY_TIME_MS, 3000);
