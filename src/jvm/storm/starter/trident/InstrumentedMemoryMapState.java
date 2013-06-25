@@ -26,17 +26,21 @@ public class InstrumentedMemoryMapState<T> extends MemoryMapState<T> {
     @Override
     public List<T> multiUpdate(List<List<Object>> keys,
             List<ValueUpdater> updaters) {
-        LOG.trace(Utils.logString("InstrumentedMemoryMapState", "multiUpdate",
-                "updating", "key size", "" + keys.size(), "payload",
-                updaters.toString()));
+        if (LOG.isTraceEnabled()) {
+            LOG.trace(Utils.logString("InstrumentedMemoryMapState",
+                    "multiUpdate", "updating", "key size", "" + keys.size(),
+                    "payload", updaters.toString()));
+        }
         return super.multiUpdate(keys, updaters);
     }
 
     @Override
     public void multiPut(List<List<Object>> keys, List<T> vals) {
-        LOG.trace(Utils.logString("InstrumentedMemoryMapState", "multiPut",
-                "updating", "key size", "" + keys.size(), "payload",
-                vals.toString()));
+        if (LOG.isTraceEnabled()) {
+            LOG.trace(Utils.logString("InstrumentedMemoryMapState", "multiPut",
+                    "updating", "key size", "" + keys.size(), "payload",
+                    vals.toString()));
+        }
 
         super.multiPut(keys, vals);
     }
@@ -44,9 +48,11 @@ public class InstrumentedMemoryMapState<T> extends MemoryMapState<T> {
     @Override
     public List<T> multiGet(List<List<Object>> keys) {
 
-        LOG.trace(Utils.logString("InstrumentedMemoryMapState", "multiPut",
-                "updating", "key size", "" + keys.size(), "payload",
-                keys.toString()));
+        if (LOG.isTraceEnabled()) {
+            LOG.trace(Utils.logString("InstrumentedMemoryMapState", "multiPut",
+                    "updating", "key size", "" + keys.size(), "payload",
+                    keys.toString()));
+        }
         return super.multiGet(keys);
     }
 
