@@ -54,27 +54,27 @@
   
   <logger name="backtype.storm.utils.InstrumentedDisruptorQueue" additivity="true" >
     <level value="TRACE"/>
-    <appender-ref ref="CLEANCONSOLE"/>
+    <appender-ref ref="CONSOLE"/>
   </logger>
   <logger name="storm.trident.topology.MasterBatchCoordinator" additivity="true" >
     <level value="TRACE"/>
-    <appender-ref ref="CLEANCONSOLE"/>
+    <appender-ref ref="CONSOLE"/>
   </logger>
   <logger name="storm.trident.topology.TridentBoltExecutor" additivity="true" >
     <level value="TRACE"/>
-    <appender-ref ref="CLEANCONSOLE"/>
+    <appender-ref ref="CONSOLE"/>
   </logger>
   <logger name="storm.trident.spout.TridentSpoutCoordinator" additivity="true" >
     <level value="TRACE"/>
-    <appender-ref ref="CLEANCONSOLE"/>
+    <appender-ref ref="CONSOLE"/>
   </logger>
   <logger name="backtype.storm.daemon.acker" additivity="true" >
     <level value="TRACE"/>
-    <appender-ref ref="CLEANCONSOLE"/>
+    <appender-ref ref="CONSOLE"/>
   </logger>
   <logger name="storm.starter.trident" additivity="true" >
     <level value="TRACE"/>
-    <appender-ref ref="CLEANCONSOLE"/>
+    <appender-ref ref="CONSOLE"/>
   </logger>
   
 </configuration>
