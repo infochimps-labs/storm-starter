@@ -1,9 +1,10 @@
 package storm.starter.trident;
 
-import storm.trident.Stream;
+import storm.trident.TridentState;
 import storm.trident.TridentTopology;
 import storm.trident.operation.BaseFunction;
 import storm.trident.operation.TridentCollector;
+import storm.trident.operation.builtin.Count;
 import storm.trident.testing.FixedBatchSpout;
 import storm.trident.tuple.TridentTuple;
 import backtype.storm.Config;
@@ -29,7 +30,7 @@ public class TridentWordCount {
 
     public static StormTopology buildTopology(LocalDRPC drpc) {
         FixedBatchSpout spout = new InstrumentedFixedBatchSpout(new Fields(
-                "sentence"), 3, new Values("the cow jumped over the moon"),
+                "sentence"), 10, new Values("the cow jumped over the moon"),
                 new Values("the man went to the store and bought some candy"),
                 new Values("four score and seven years ago"), new Values(
                         "how many apples can you eat"), new Values(
@@ -37,13 +38,13 @@ public class TridentWordCount {
         spout.setCycle(true);
 
         TridentTopology topology = new TridentTopology();
-        Stream wordCounts = topology.newStream("spout1", spout)
+        TridentState wordCounts = topology
+                .newStream("spout1", spout)
                 .parallelismHint(1)
-                .each(new Fields("sentence"), new Split(), new Fields("word"));
-
-        // .groupBy(new Fields("word"))
-        // .persistentAggregate(new InstrumentedMemoryMapState.Factory(),
-        // new Count(), new Fields("count")).parallelismHint(1);
+                .each(new Fields("sentence"), new Split(), new Fields("word"))
+                .groupBy(new Fields("word"))
+                .persistentAggregate(new InstrumentedMemoryMapState.Factory(),
+                        new Count(), new Fields("count")).parallelismHint(1);
 
         // topology.newDRPCStream("words", drpc)
         // .each(new Fields("args"), new Split(), new Fields("word"))
@@ -58,9 +59,9 @@ public class TridentWordCount {
 
     public static void main(String[] args) throws Exception {
         Config conf = new Config();
-        conf.setMaxSpoutPending(1);
-        conf.put(Config.TOPOLOGY_SLEEP_SPOUT_WAIT_STRATEGY_TIME_MS, 3000);
-        conf.put(Config.TOPOLOGY_TRIDENT_BATCH_EMIT_INTERVAL_MILLIS, 5000);
+        conf.setMaxSpoutPending(3);
+        // conf.put(Config.TOPOLOGY_SLEEP_SPOUT_WAIT_STRATEGY_TIME_MS, 3000);
+        // conf.put(Config.TOPOLOGY_TRIDENT_BATCH_EMIT_INTERVAL_MILLIS, 5000);
         if (args.length == 0) {
             LocalDRPC drpc = new LocalDRPC();
             LocalCluster cluster = new LocalCluster();
