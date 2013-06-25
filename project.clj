@@ -2,7 +2,7 @@
   :source-paths ["src/clj"]
   :java-source-paths ["src/jvm"]
   :test-paths ["test/jvm"]
-  :resource-paths ["multilang" "conf"]
+  :resource-paths ["multilang"]
   :aot :all
   :repositories {
                  "central-1" "http://repo1.maven.org/maven1"
@@ -20,7 +20,8 @@
                  ]
 
   :profiles {:dev
-              {:dependencies [[storm/storm-core "0.9.0-wip19"]
+              { :resource-paths ["conf"]
+		:dependencies [[storm/storm-core "0.9.0-wip19"]
                               [storm/storm-kafka "0.9.0-wip16a-scala292"]
                               [junit/junit "3.8.1" :scope "test" ]
                               [org.testng/testng "6.8" ]
