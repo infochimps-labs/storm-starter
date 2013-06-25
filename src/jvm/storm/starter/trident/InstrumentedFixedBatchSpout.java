@@ -18,15 +18,19 @@ public class InstrumentedFixedBatchSpout extends FixedBatchSpout {
     @Override
     public void emitBatch(long batchId, TridentCollector collector) {
 
-        LOG.trace(Utils.logString("InstrumentedFixedBatchSpout", "emitBatch",
-                "", "", "msgId", "" + batchId));
+        if (LOG.isTraceEnabled()) {
+            LOG.trace(Utils.logString("InstrumentedFixedBatchSpout",
+                    "emitBatch", "", "", "msgId", "" + batchId));
+        }
         super.emitBatch(batchId, collector);
     }
 
     @Override
     public void ack(long batchId) {
-        LOG.trace(Utils.logString("InstrumentedFixedBatchSpout", "ack", "", "",
-                "msgId", "" + batchId));
+        if (LOG.isTraceEnabled()) {
+            LOG.trace(Utils.logString("InstrumentedFixedBatchSpout", "ack", "",
+                    "", "msgId", "" + batchId));
+        }
         super.ack(batchId);
     }
 
