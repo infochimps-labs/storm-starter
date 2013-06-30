@@ -9,4 +9,4 @@ target/
 *.jar
 .lein-deps-sum
 .DS_Store
-*.log
+*.log*
