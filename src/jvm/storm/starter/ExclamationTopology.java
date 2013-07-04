@@ -16,6 +16,8 @@ import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 import backtype.storm.utils.Utils;
 
+import com.infochimps.storm.testrig.MetricsPrinter;
+
 /**
  * This is a basic example of a Storm topology.
  */
@@ -28,14 +30,19 @@ public class ExclamationTopology {
         public void prepare(Map conf, TopologyContext context,
                 OutputCollector collector) {
             _collector = collector;
+            // System.out.println(ObjectUtils.toString(context));
+            // System.out.println(context);
+            // System.out.println(conf);
+
         }
 
         @Override
         public void execute(Tuple tuple) {
-            Utils.sleep(5);
+            // Utils.sleep(5);
+            // System.out.println("execute");
             _collector.emit(tuple, new Values(tuple.getString(0) + "!!!"));
-            _collector.emit(tuple, new Values(tuple.getString(0) + "!!!"));
-            _collector.emit(tuple, new Values(tuple.getString(0) + "!!!"));
+            // _collector.emit(tuple, new Values(tuple.getString(0) + "!!!"));
+            // _collector.emit(tuple, new Values(tuple.getString(0) + "!!!"));
             _collector.ack(tuple);
         }
 
@@ -49,16 +56,17 @@ public class ExclamationTopology {
     public static void main(String[] args) throws Exception {
         TopologyBuilder builder = new TopologyBuilder();
 
-        builder.setSpout("word", new RandomSentenceSpout(), 10);
+        builder.setSpout("word", new RandomSentenceSpout(), 1);
         builder.setBolt("exclaim1", new ExclamationBolt(), 1).shuffleGrouping(
                 "word");
-        // builder.setBolt("exclaim2", new ExclamationBolt(), 2)
-        // .shuffleGrouping("exclaim1");
+        builder.setBolt("exclaim2", new ExclamationBolt(), 2).shuffleGrouping(
+                "exclaim1");
 
         Config conf = new Config();
-        conf.setDebug(true);
-
-        System.out.println(conf.size());
+        conf.setDebug(false);
+        conf.put(conf.TOPOLOGY_BUILTIN_METRICS_BUCKET_SIZE_SECS, 10);
+        conf.registerMetricsConsumer(MetricsPrinter.class);
+        System.out.println(conf);
 
         for (Map.Entry e : conf.entrySet()) {
             System.out.println(e.getKey() + " = " + e.getValue());
@@ -74,7 +82,7 @@ public class ExclamationTopology {
 
             LocalCluster cluster = new LocalCluster();
             cluster.submitTopology("test", conf, builder.createTopology());
-            Utils.sleep(10000000);
+            Utils.sleep(1000000);
             // Utils.sleep(10000000);
             // Utils.sleep(10000000);
             cluster.killTopology("test");
