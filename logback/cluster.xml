@@ -1,60 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<configuration scan="true" scanPeriod="60 seconds">
+<configuration scan="true" scanPeriod="5 seconds">
+  <logger name="ch.qos.logback.classic.joran.action.ConfigurationAction"><level value="WARN"/></logger>
+  
   <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
-      <pattern>%-8r [%-30c{1}] %-5p %m%n</pattern>
+      <pattern>%d %-5p [%-30c{1}] %-8r %m%n</pattern>
     </encoder>
   </appender>
   
-  <appender name="A1" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>${storm.home}/logs/storm.log</file>
-    <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-      <fileNamePattern>${storm.home}/logs/${logfile.name}.%i</fileNamePattern>
-      <minIndex>1</minIndex>
-      <maxIndex>9</maxIndex>
-    </rollingPolicy>
-
-    <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-      <maxFileSize>100MB</maxFileSize>
-    </triggeringPolicy>
-
+  <appender name="A1" class="ch.qos.logback.core.FileAppender">
+    <file>/tmp/logs/storm.log</file>
     <encoder>
-      <pattern>%-8r [%-30c{1}] %-5p %m%n</pattern>
+      <pattern>%d %-5p [%-30c{1}] %-8r %m%n</pattern>
     </encoder>
   </appender> 
 
-  <appender name="ACCESS" class="ch.qos.logback.core.rolling.RollingFileAppender">
+  <appender name="ACCESS" class="ch.qos.logback.core.FileAppender">
     <file>${storm.home}/logs/access.log</file>
-    <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-      <fileNamePattern>${storm.home}/logs/access.log.%i</fileNamePattern>
-      <minIndex>1</minIndex>
-      <maxIndex>9</maxIndex>
-    </rollingPolicy>
-
-    <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-      <maxFileSize>100MB</maxFileSize>
-    </triggeringPolicy>
-
     <encoder>
-      <pattern>%-8r [%-30c{1}] %-5p %m%n</pattern>
+      <pattern>%d %-5p [%-30c{1}] %-8r %m%n</pattern>
     </encoder>
   </appender>
 
-  <appender name="METRICS" class="ch.qos.logback.core.rolling.RollingFileAppender">
+  <appender name="METRICS" class="ch.qos.logback.core.FileAppender">
     <file>${storm.home}/logs/metrics.log</file>
-    <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-      <fileNamePattern>metrics.log.%i</fileNamePattern>
-      <minIndex>1</minIndex>
-      <maxIndex>9</maxIndex>
-    </rollingPolicy>
-
-    <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-      <maxFileSize>2MB</maxFileSize>
-    </triggeringPolicy>
-
     <encoder>
-      <pattern>%-8r %m%n</pattern>
+      <pattern>%d %-8r %m%n</pattern>
     </encoder>
   </appender>
   
@@ -66,15 +38,24 @@
     <level value="INFO" />
     <appender-ref ref="ACCESS" />
   </logger>
-  
+ 
+  <logger name="backtype.storm.metric.LoggingMetricsConsumer" additivity="false" >
+    <level value="INFO"/>
+    <appender-ref ref="METRICS"/>
+  </logger>
+ 
   <logger name="com.infochimps" level="DEBUG" additivity="true" >
+    <level value="DEBUG"/>
+    <appender-ref ref="CONSOLE"/> <!-- output this to the console and the log --> 
+  </logger>
+
+  <logger name="storm.starter.trident" additivity="true" >
     <level value="DEBUG"/>
     <appender-ref ref="CONSOLE"/> <!-- output this to the console and the log --> 
   </logger>
 
   <logger name="backtype.storm.utils.InstrumentedDisruptorQueue" additivity="true" >
     <level value="TRACE"/>
-    <appender-ref ref="CONSOLE"/> <!-- output this to the console and the log --> 
   </logger>
   <logger name="storm.trident.topology.MasterBatchCoordinator" additivity="true" >
     <level value="TRACE"/>
@@ -86,10 +67,6 @@
     <level value="TRACE"/>
   </logger>
   <logger name="backtype.storm.daemon.acker" additivity="true" >
-    <level value="TRACE"/>
-  </logger>
-
-  <logger name="storm.starter.trident" additivity="true" >
     <level value="TRACE"/>
   </logger>
 
