@@ -21,8 +21,8 @@
 
   :profiles {:dev
               { :resource-paths ["conf"]
-		:dependencies [[storm/storm-core "0.9.0-wip19"]
-                              [storm/storm-kafka "0.9.0-wip16a-scala292"]
+		:dependencies [[storm/storm-core "0.9.0-wip21"]
+                              [storm/storm-kafka "0.9.0-wip16-ics"]
                               [junit/junit "3.8.1" :scope "test" ]
                               [org.testng/testng "6.8" ]
                               [org.mockito/mockito-all "1.9.0"]

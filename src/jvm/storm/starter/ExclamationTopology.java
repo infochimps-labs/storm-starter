@@ -16,7 +16,7 @@ import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 import backtype.storm.utils.Utils;
 
-import com.infochimps.storm.testrig.MetricsPrinter;
+import backtype.storm.metric.LoggingMetricsConsumer;
 
 /**
  * This is a basic example of a Storm topology.
@@ -30,19 +30,13 @@ public class ExclamationTopology {
         public void prepare(Map conf, TopologyContext context,
                 OutputCollector collector) {
             _collector = collector;
-            // System.out.println(ObjectUtils.toString(context));
-            // System.out.println(context);
-            // System.out.println(conf);
-
         }
 
         @Override
         public void execute(Tuple tuple) {
             // Utils.sleep(5);
-            // System.out.println("execute");
             _collector.emit(tuple, new Values(tuple.getString(0) + "!!!"));
-            // _collector.emit(tuple, new Values(tuple.getString(0) + "!!!"));
-            // _collector.emit(tuple, new Values(tuple.getString(0) + "!!!"));
+            _collector.emit(tuple, new Values(tuple.getString(0) + "!!!"));
             _collector.ack(tuple);
         }
 
@@ -64,8 +58,8 @@ public class ExclamationTopology {
 
         Config conf = new Config();
         conf.setDebug(false);
-        conf.put(conf.TOPOLOGY_BUILTIN_METRICS_BUCKET_SIZE_SECS, 10);
-        conf.registerMetricsConsumer(MetricsPrinter.class);
+        conf.put(conf.TOPOLOGY_BUILTIN_METRICS_BUCKET_SIZE_SECS, 5);
+        conf.registerMetricsConsumer(LoggingMetricsConsumer.class);
         System.out.println(conf);
 
         for (Map.Entry e : conf.entrySet()) {
@@ -82,7 +76,7 @@ public class ExclamationTopology {
 
             LocalCluster cluster = new LocalCluster();
             cluster.submitTopology("test", conf, builder.createTopology());
-            Utils.sleep(1000000);
+            Utils.sleep(2000000);
             // Utils.sleep(10000000);
             // Utils.sleep(10000000);
             cluster.killTopology("test");
