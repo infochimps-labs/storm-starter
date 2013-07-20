@@ -1,33 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<configuration scan="true" scanPeriod="30 seconds">
+<configuration scan="true" scanPeriod="60 seconds">
   <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
-      <pattern>%-8r %m [%t]%n</pattern>
+      <pattern>%-8r [%-30c{1}] %-5p %m%n</pattern>
     </encoder>
   </appender>
-
-  <appender name="S" class="ch.qos.logback.core.rolling.RollingFileAppender">
+  
+  <appender name="A1" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <file>${storm.home}/logs/storm.log</file>
     <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-      <fileNamePattern>storm.log.%i</fileNamePattern>
+      <fileNamePattern>${storm.home}/logs/${logfile.name}.%i</fileNamePattern>
       <minIndex>1</minIndex>
       <maxIndex>9</maxIndex>
     </rollingPolicy>
 
     <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-      <maxFileSize>50MB</maxFileSize>
+      <maxFileSize>100MB</maxFileSize>
     </triggeringPolicy>
 
     <encoder>
-      <pattern>%-8r %m [%t]%n</pattern>
+      <pattern>%-8r [%-30c{1}] %-5p %m%n</pattern>
+    </encoder>
+  </appender> 
+
+  <appender name="ACCESS" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${storm.home}/logs/access.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+      <fileNamePattern>${storm.home}/logs/access.log.%i</fileNamePattern>
+      <minIndex>1</minIndex>
+      <maxIndex>9</maxIndex>
+    </rollingPolicy>
+
+    <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+      <maxFileSize>100MB</maxFileSize>
+    </triggeringPolicy>
+
+    <encoder>
+      <pattern>%-8r [%-30c{1}] %-5p %m%n</pattern>
     </encoder>
   </appender>
 
-  <appender name="Q" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>${storm.home}/logs/queue.log</file>
+  <appender name="METRICS" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${storm.home}/logs/metrics.log</file>
     <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-      <fileNamePattern>queue.log.%i</fileNamePattern>
+      <fileNamePattern>metrics.log.%i</fileNamePattern>
       <minIndex>1</minIndex>
       <maxIndex>9</maxIndex>
     </rollingPolicy>
@@ -37,44 +54,43 @@
     </triggeringPolicy>
 
     <encoder>
-      <pattern>%-8r %m [%t]%n</pattern>
+      <pattern>%-8r %m%n</pattern>
     </encoder>
   </appender>
-
-  <logger name="org.apache.zookeeper" level="WARN"/>
+  
   <root level="INFO">
-    <appender-ref ref="S"/>
+    <appender-ref ref="A1"/>
   </root>
-  
-  
-  <logger name="com.infochimps" level="DEBUG">
-    <level value="DEBUG"/>
-    <appender-ref ref="CONSOLE"/>
+
+  <logger name="backtype.storm.security.auth.authorizer" additivity="false">
+    <level value="INFO" />
+    <appender-ref ref="ACCESS" />
   </logger>
   
+  <logger name="com.infochimps" level="DEBUG" additivity="true" >
+    <level value="DEBUG"/>
+    <appender-ref ref="CONSOLE"/> <!-- output this to the console and the log --> 
+  </logger>
+
   <logger name="backtype.storm.utils.InstrumentedDisruptorQueue" additivity="true" >
     <level value="TRACE"/>
-    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="CONSOLE"/> <!-- output this to the console and the log --> 
   </logger>
   <logger name="storm.trident.topology.MasterBatchCoordinator" additivity="true" >
     <level value="TRACE"/>
-    <appender-ref ref="CONSOLE"/>
   </logger>
   <logger name="storm.trident.topology.TridentBoltExecutor" additivity="true" >
     <level value="TRACE"/>
-    <appender-ref ref="CONSOLE"/>
   </logger>
   <logger name="storm.trident.spout.TridentSpoutCoordinator" additivity="true" >
     <level value="TRACE"/>
-    <appender-ref ref="CONSOLE"/>
   </logger>
   <logger name="backtype.storm.daemon.acker" additivity="true" >
     <level value="TRACE"/>
-    <appender-ref ref="CONSOLE"/>
   </logger>
+
   <logger name="storm.starter.trident" additivity="true" >
     <level value="TRACE"/>
-    <appender-ref ref="CONSOLE"/>
   </logger>
-  
+
 </configuration>
