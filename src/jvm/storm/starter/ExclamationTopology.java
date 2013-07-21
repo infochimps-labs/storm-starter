@@ -1,5 +1,8 @@
 package storm.starter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Map;
 
 import storm.starter.spout.RandomSentenceSpout;
@@ -24,17 +27,18 @@ import backtype.storm.metric.LoggingMetricsConsumer;
 public class ExclamationTopology {
 
     public static class ExclamationBolt extends BaseRichBolt {
+        public static final Logger LOG = LoggerFactory.getLogger(ExclamationTopology.class);
         OutputCollector _collector;
 
         @Override
-        public void prepare(Map conf, TopologyContext context,
-                OutputCollector collector) {
+        public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
             _collector = collector;
         }
 
         @Override
         public void execute(Tuple tuple) {
             // Utils.sleep(5);
+            LOG.info("execute: " + tuple.toString());
             _collector.emit(tuple, new Values(tuple.getString(0) + "!!!"));
             _collector.emit(tuple, new Values(tuple.getString(0) + "!!!"));
             _collector.ack(tuple);
@@ -51,10 +55,10 @@ public class ExclamationTopology {
         TopologyBuilder builder = new TopologyBuilder();
 
         builder.setSpout("word", new RandomSentenceSpout(), 1);
-        builder.setBolt("exclaim1", new ExclamationBolt(), 1).shuffleGrouping(
-                "word");
-        builder.setBolt("exclaim2", new ExclamationBolt(), 2).shuffleGrouping(
-                "exclaim1");
+        builder.setBolt("exclaim1", new ExclamationBolt(), 1)
+            .shuffleGrouping("word");
+        builder.setBolt("exclaim2", new ExclamationBolt(), 2)
+            .shuffleGrouping("exclaim1");
 
         Config conf = new Config();
         conf.setDebug(false);
@@ -68,8 +72,7 @@ public class ExclamationTopology {
         }
 
         if (args != null && args.length > 0) {
-            conf.setNumWorkers(3);
-
+            conf.setNumWorkers(1);
             StormSubmitter.submitTopology(args[0], conf,
                     builder.createTopology());
         } else {

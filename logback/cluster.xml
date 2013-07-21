@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <configuration scan="true" scanPeriod="5 seconds">
-  <logger name="ch.qos.logback.classic.joran.action.ConfigurationAction"><level value="WARN"/></logger>
-  
   <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
       <pattern>%d %-5p [%-30c{1}] %-8r %m%n</pattern>
@@ -44,12 +42,12 @@
     <appender-ref ref="METRICS"/>
   </logger>
  
-  <logger name="com.infochimps" level="DEBUG" additivity="true" >
+  <logger name="com.infochimps" additivity="true" >
     <level value="DEBUG"/>
     <appender-ref ref="CONSOLE"/> <!-- output this to the console and the log --> 
   </logger>
 
-  <logger name="storm.starter.trident" additivity="true" >
+  <logger name="storm.starter" additivity="true" >
     <level value="DEBUG"/>
     <appender-ref ref="CONSOLE"/> <!-- output this to the console and the log --> 
   </logger>
@@ -66,7 +64,7 @@
   <logger name="storm.trident.spout.TridentSpoutCoordinator" additivity="true" >
     <level value="TRACE"/>
   </logger>
-  <logger name="backtype.storm.daemon.acker" additivity="true" >
+  <logger name="backtype.storm.daemon" additivity="true" >
     <level value="TRACE"/>
   </logger>
 

@@ -39,13 +39,11 @@ public class InstrumentedMemoryMapState<T> extends MemoryMapState<T> {
             LOG.trace(Utils.logString("MemoryMapState.multiPut", _id, "",
                     "key size", "" + keys.size(), "payload", vals.toString()));
         }
-
         super.multiPut(keys, vals);
     }
 
     @Override
     public List<T> multiGet(List<List<Object>> keys) {
-
         if (LOG.isTraceEnabled()) {
             LOG.trace(Utils.logString("MemoryMapState.multiGet", _id, "",
                     "key size", "" + keys.size(), "payload", keys.toString()));

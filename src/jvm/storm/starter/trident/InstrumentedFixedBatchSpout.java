@@ -55,9 +55,8 @@ public class InstrumentedFixedBatchSpout implements IBatchSpout {
     @Override
     public void emitBatch(long batchId, TridentCollector collector) {
 
-        if (LOG.isTraceEnabled()) {
+        if (LOG.isTraceEnabled())
             LOG.trace(Utils.logString("FixedBatchSpout.emitBatch", "", ""+batchId, "count", ""+maxBatchSize));
-        }
 
         if (index >= outputs.length && cycle) {
             index = 0;
@@ -69,9 +68,8 @@ public class InstrumentedFixedBatchSpout implements IBatchSpout {
 
     @Override
     public void ack(long batchId) {
-        if (LOG.isTraceEnabled()) {
+        if (LOG.isTraceEnabled())
             LOG.trace(Utils.logString("FixedBatchSpout.ack", "", ""+batchId));
-        }
     }
 
     @Override
