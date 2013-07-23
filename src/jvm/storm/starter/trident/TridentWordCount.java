@@ -1,5 +1,8 @@
 package storm.starter.trident;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import storm.trident.TridentState;
 import storm.trident.TridentTopology;
 import storm.trident.operation.BaseFunction;
@@ -13,12 +16,16 @@ import backtype.storm.StormSubmitter;
 import backtype.storm.generated.StormTopology;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
+import backtype.storm.metric.LoggingMetricsConsumer;
 
 public class TridentWordCount {
+    public static final Logger LOG = LoggerFactory.getLogger(TridentWordCount.class);
+
     public static class Split extends BaseFunction {
         @Override
         public void execute(TridentTuple tuple, TridentCollector collector) {
             // System.out.println("Split execute called");
+            LOG.info("splitting: " + tuple.toString());
 
             String sentence = tuple.getString(0);
             for (String word : sentence.split(" ")) {
@@ -61,8 +68,14 @@ public class TridentWordCount {
 
         Config conf = new Config();
         conf.setMaxSpoutPending(3);
-        // conf.put(Config.TOPOLOGY_SLEEP_SPOUT_WAIT_STRATEGY_TIME_MS, 3000);
-        // conf.put(Config.TOPOLOGY_TRIDENT_BATCH_EMIT_INTERVAL_MILLIS, 5000);
+        conf.setDebug(false);
+        conf.put(conf.TOPOLOGY_BUILTIN_METRICS_BUCKET_SIZE_SECS, 5);
+        conf.registerMetricsConsumer(LoggingMetricsConsumer.class);
+
+        conf.put(Config.TOPOLOGY_TRIDENT_BATCH_EMIT_INTERVAL_MILLIS, 1500);
+
+        System.out.println(conf);
+
         if (args.length == 0) {
             LocalDRPC drpc = new LocalDRPC();
             LocalCluster cluster = new LocalCluster();

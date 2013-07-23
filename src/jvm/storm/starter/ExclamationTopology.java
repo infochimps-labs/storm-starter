@@ -25,9 +25,9 @@ import backtype.storm.metric.LoggingMetricsConsumer;
  * This is a basic example of a Storm topology.
  */
 public class ExclamationTopology {
+    public static final Logger LOG = LoggerFactory.getLogger(ExclamationTopology.class);
 
     public static class ExclamationBolt extends BaseRichBolt {
-        public static final Logger LOG = LoggerFactory.getLogger(ExclamationTopology.class);
         OutputCollector _collector;
 
         @Override
