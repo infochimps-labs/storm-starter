@@ -17,6 +17,8 @@
 
   :dependencies [
                    [commons-collections/commons-collections "3.2.1"]
+                   [com.fasterxml.jackson.core/jackson-databind "2.2.0"]
+                   [com.amazonaws/aws-java-sdk "1.3.27"]
                  ]
 
   :profiles {:dev
