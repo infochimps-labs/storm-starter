@@ -1,5 +1,8 @@
 package com.infochimps.storm.spout.file;
 
+import java.util.HashMap;
+
+
 import storm.starter.trident.InstrumentedMemoryMapState;
 import storm.trident.TridentState;
 import storm.trident.TridentTopology;
@@ -41,7 +44,7 @@ public class FileTestTopology {
         TridentTopology topology = new TridentTopology();
         TridentState wordCounts = topology
                 .newStream("spout1", spout)
-                .parallelismHint(2)
+                .parallelismHint(1)
                 .each(new Fields("line"), new Split(), new Fields("word"))
                 .groupBy(new Fields("word"))
                 .persistentAggregate(new InstrumentedMemoryMapState.Factory(), new Count(), new Fields("count"))
@@ -50,6 +53,7 @@ public class FileTestTopology {
         Config conf = new Config();
         conf.setMessageTimeoutSecs(10);
         // conf.setMaxSpoutPending(3);
+        System.out.println("Topology created");
         if (args.length == 0) {
             LocalCluster cluster = new LocalCluster();
             cluster.submitTopology("wordCounter", conf, topology.build());

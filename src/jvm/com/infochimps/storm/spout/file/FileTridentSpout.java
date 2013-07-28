@@ -18,7 +18,7 @@ public class FileTridentSpout implements ITridentSpout<String>{
     @Override
     public storm.trident.spout.ITridentSpout.BatchCoordinator<String> getCoordinator(String txStateId, Map conf, TopologyContext context) {
         System.out.println("Spout.getCoordinator() called - txStateId : " + txStateId);
-        return new FileBatchCoordintor(_dir);
+        return new FileBatchCoordinator(_dir);
     }
 
     @Override
