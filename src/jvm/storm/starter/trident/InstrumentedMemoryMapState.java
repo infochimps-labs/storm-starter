@@ -15,21 +15,20 @@ import backtype.storm.task.IMetricsContext;
 import backtype.storm.utils.Utils;
 
 public class InstrumentedMemoryMapState<T> extends MemoryMapState<T> {
-
-    static final Logger LOG = LoggerFactory
-            .getLogger(InstrumentedMemoryMapState.class);
+    static final Logger LOG = LoggerFactory.getLogger(InstrumentedMemoryMapState.class);
+    String _id;
 
     public InstrumentedMemoryMapState(String id) {
         super(id);
+        _id = id;
     }
 
     @Override
     public List<T> multiUpdate(List<List<Object>> keys,
             List<ValueUpdater> updaters) {
         if (LOG.isTraceEnabled()) {
-            LOG.trace(Utils.logString("InstrumentedMemoryMapState",
-                    "multiUpdate", "updating", "", "key size",
-                    "" + keys.size(), "payload", updaters.toString()));
+            LOG.trace(Utils.logString("MemoryMapState.multiUpdate", _id, "",
+                    "key size",  ""+keys.size(), "payload", updaters.toString()));
         }
         return super.multiUpdate(keys, updaters);
     }
@@ -37,21 +36,17 @@ public class InstrumentedMemoryMapState<T> extends MemoryMapState<T> {
     @Override
     public void multiPut(List<List<Object>> keys, List<T> vals) {
         if (LOG.isTraceEnabled()) {
-            LOG.trace(Utils.logString("InstrumentedMemoryMapState", "multiPut",
-                    "updating", "", "key size", "" + keys.size(), "payload",
-                    vals.toString()));
+            LOG.trace(Utils.logString("MemoryMapState.multiPut", _id, "",
+                    "key size", "" + keys.size(), "payload", vals.toString()));
         }
-
         super.multiPut(keys, vals);
     }
 
     @Override
     public List<T> multiGet(List<List<Object>> keys) {
-
         if (LOG.isTraceEnabled()) {
-            LOG.trace(Utils.logString("InstrumentedMemoryMapState", "multiPut",
-                    "updating", "", "key size", "" + keys.size(), "payload",
-                    keys.toString()));
+            LOG.trace(Utils.logString("MemoryMapState.multiGet", _id, "",
+                    "key size", "" + keys.size(), "payload", keys.toString()));
         }
         return super.multiGet(keys);
     }

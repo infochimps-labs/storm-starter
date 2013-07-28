@@ -19,8 +19,7 @@ public class InstrumentedFixedBatchSpout implements IBatchSpout {
     List<Object>[] outputs;
     int maxBatchSize;
 
-    public InstrumentedFixedBatchSpout(Fields fields, int maxBatchSize,
-            List<Object>... outputs) {
+    public InstrumentedFixedBatchSpout(Fields fields, int maxBatchSize, List<Object>... outputs) {
         this.fields = fields;
         this.outputs = outputs;
         this.maxBatchSize = maxBatchSize;
@@ -56,11 +55,8 @@ public class InstrumentedFixedBatchSpout implements IBatchSpout {
     @Override
     public void emitBatch(long batchId, TridentCollector collector) {
 
-        if (LOG.isTraceEnabled()) {
-            LOG.trace(Utils.logString("InstrumentedFixedBatchSpout",
-                    "emitBatch", "", "", "count", "" + maxBatchSize, "msgId",
-                    "" + batchId));
-        }
+        if (LOG.isTraceEnabled())
+            LOG.trace(Utils.logString("FixedBatchSpout.emitBatch", "", ""+batchId, "count", ""+maxBatchSize));
 
         if (index >= outputs.length && cycle) {
             index = 0;
@@ -72,10 +68,8 @@ public class InstrumentedFixedBatchSpout implements IBatchSpout {
 
     @Override
     public void ack(long batchId) {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace(Utils.logString("InstrumentedFixedBatchSpout", "ack", "",
-                    "", "msgId", "" + batchId));
-        }
+        if (LOG.isTraceEnabled())
+            LOG.trace(Utils.logString("FixedBatchSpout.ack", "", ""+batchId));
     }
 
     @Override
