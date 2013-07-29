@@ -25,7 +25,7 @@
               { :resource-paths ["conf"]
                 :dependencies [[storm/storm-core                 "0.9.0-wip21-ics"]
                                [storm/storm-kafka                "0.9.0-wip21-ics"]
-                               [storm/storm-util                 "1.7.0-SNAPSHOT"]
+                               [com.infochimps/storm-util                 "1.7.0-SNAPSHOT"]
                                [junit/junit                      "3.8.1" :scope "test" ]
                                [org.testng/testng                "6.8" ]
                                [org.mockito/mockito-all          "1.9.0"]
