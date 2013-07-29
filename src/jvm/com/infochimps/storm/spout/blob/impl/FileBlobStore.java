@@ -60,6 +60,11 @@ public class FileBlobStore implements BlobStore{
             }
         return br;
     }
+
+    @Override
+    public String getMetaData(String blobMarker) {
+        return "{ \"fileName\" : \" " + _dir + "/" + blobMarker + "\"}";
+    }
     
 
 }

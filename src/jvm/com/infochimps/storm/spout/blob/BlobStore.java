@@ -33,5 +33,12 @@ public interface BlobStore extends Serializable {
      * @return
      */
     public InputStream getBlob(String blobMarker, Map<String, Object> context);
+    
+    /**
+     * Get metadata for the marker.
+     * @param blobMarker
+     * @return jsonString - A json string containing the metadata.
+     */
+    public String getMetaData(String blobMarker);
 
 }

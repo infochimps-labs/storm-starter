@@ -26,11 +26,7 @@ public class S3BlobStore implements BlobStore{
     private String _prefix;
     private String _bucket;
     private AmazonS3Client _client;
-
-
     private String _secretKey;
-
-
     private String _accessKey;
     
     public S3BlobStore(String prefix, String bucket, String accessKey, String secretKey) {
@@ -41,6 +37,15 @@ public class S3BlobStore implements BlobStore{
 
     }
 
+    @Override
+    public boolean initialize() {
+        _client = new AmazonS3Client(new BasicAWSCredentials(_accessKey, _secretKey));
+
+        // Blow up if the AmazonS3Client is not configured properly.
+        _client.getBucketAcl(_bucket);
+        return true;
+    }
+    
     @Override
     public String getNextBlobMarker(String currentMarker) {
         ListObjectsRequest listObjectsRequest = new ListObjectsRequest()
@@ -72,13 +77,11 @@ public class S3BlobStore implements BlobStore{
         return object.getObjectContent();
     }
 
-    @Override
-    public boolean initialize() {
-        _client = new AmazonS3Client(new BasicAWSCredentials(_accessKey, _secretKey));
 
-        // Blow up if the AmazonS3Client is not configured properly.
-        _client.getBucketAcl(_bucket);
-        return false;
+    
+    @Override
+    public String getMetaData(String blobMarker) {
+        return "{ \"dummy\" : \"true\"}";
     }
 
 }
