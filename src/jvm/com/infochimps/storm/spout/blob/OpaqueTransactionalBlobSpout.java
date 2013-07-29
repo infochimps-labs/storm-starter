@@ -1,7 +1,8 @@
-package com.infochimps.storm.spout.s3;
+package com.infochimps.storm.spout.blob;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,27 +30,22 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 import backtype.storm.utils.Utils;
 
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class OpaqueTransactionalBlobSpout
         implements
         IOpaquePartitionedTridentSpout<Map, OpaqueTransactionalBlobSpout.SinglePartition, Map> {
     
     private static final Logger LOG = LoggerFactory.getLogger(OpaqueTransactionalBlobSpout.class);
 
-    private String _prefix;
-    private String _bucket;
-    private String _accessKey;
-    private String _secretKey;
+    BlobStore _bs;
 
-    public OpaqueTransactionalBlobSpout(String _accessKey, String _secretKey, String _bucket, String _prefix ) {
-        this._prefix = _prefix;
-        this._bucket = _bucket;
-        this._accessKey = _accessKey;
-        this._secretKey = _secretKey;
+    public OpaqueTransactionalBlobSpout(BlobStore blobStore ) {
+        _bs = blobStore;
     }
 
     @Override
     public IOpaquePartitionedTridentSpout.Emitter<Map, SinglePartition, Map> getEmitter(Map conf, TopologyContext context) {
-        return new Emitter(conf, context, _accessKey, _secretKey, _bucket, _prefix);
+        return new Emitter(conf, context, _bs);
     }
 
     @Override
@@ -70,24 +66,17 @@ public class OpaqueTransactionalBlobSpout
     public class Emitter implements
             IOpaquePartitionedTridentSpout.Emitter<Map, SinglePartition, Map> {
      
-        private AmazonS3Client _client;
-        private String _S3Bucket;
-        private String _S3Prefix;
         private String _compId;
+
+        private BlobStore _blobStore;
 
         private static final String CHARACTER_SET = "UTF-8";
 
-        public Emitter(Map conf, TopologyContext context, String accessKey, String secretKey, String bucket, String prefix) {
+        public Emitter(Map conf, TopologyContext context, BlobStore blobStore) {
              
-            _client = new AmazonS3Client(new BasicAWSCredentials(accessKey, secretKey));
-            _S3Bucket = bucket;
-            _S3Prefix = prefix;
             _compId = context.getThisComponentId();
-
-            // This is here to check if the AmazonS3Client is configured properly, if not blow up.
-            _client.getBucketAcl(bucket);
-            
-            
+            _blobStore = blobStore;
+            _blobStore.initialize();
         }
 
         @Override
@@ -103,55 +92,40 @@ public class OpaqueTransactionalBlobSpout
                     
             if(lastPartitionMeta != null){
                 marker = (String) lastPartitionMeta.get("marker");
-                
                 lastBatchFailed = (Boolean) lastPartitionMeta.get("lastBatchFailed");
             }
             
             boolean isDataAvailable = true;
+            BufferedReader reader = null;
             try{
                 LOG.debug(Utils.logString("emitPartitionBatch", _compId, txId, "prev", marker));
-                
                 // Update the marker if the last batch succeeded, otherwise retry.
-                if(!lastBatchFailed){
-                    ListObjectsRequest listObjectsRequest = new ListObjectsRequest()
-                    .withBucketName(_S3Bucket)
-                    .withMaxKeys(1)
-                    .withMarker(marker)
-                    .withPrefix(_S3Prefix + "_meta");
-                    ObjectListing listing = _client.listObjects(listObjectsRequest);
-                    List<S3ObjectSummary> summaries = listing.getObjectSummaries();
-                    
+                if (!lastBatchFailed) {
+
+                    String tmp = _blobStore.getNextBlobMarker(marker);
+
                     // marker stays same if no new files are available.
-                    if (summaries.size() != 0) {
-                        
-                        S3ObjectSummary summary = summaries.get(0);
-                        marker = summary.getKey();
-                        
-                    } else {
-                        isDataAvailable = false;
-                    }
-                } 
+                    marker =  (tmp == null) ? marker : tmp;
+                    isDataAvailable = (tmp == null) ? false : true;
+                }
+                
                 LOG.debug(Utils.logString("emitPartitionBatch", _compId, txId ,"new", marker));
                 
                 /** Download the actual file **/
                 if(isDataAvailable){
+                    Map<String, Object> context = new HashMap<String,Object>();
+                    context.put("txId", txId);
+                    context.put("compId", _compId);
                     
-                    //Figure out the actual file name. (Make sure you only remove first _meta and last .meta)
+                    InputStream blobDataStream = _blobStore.getBlob(marker, context);
                     
-                    String dataKey = marker.substring(0, marker.lastIndexOf(".meta")).replaceAll(_S3Prefix + "_meta", _S3Prefix);
-                    LOG.info(Utils.logString("emitPartitionBatch", _compId, txId,"Reading S3 file", dataKey));
                     
-                    // Read it and send to the topology line by line.
-                    S3Object object = _client.getObject(new GetObjectRequest(_bucket, dataKey));
+                    reader = new BufferedReader(new InputStreamReader(blobDataStream, CHARACTER_SET));
                     
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(object.getObjectContent(), CHARACTER_SET));
-                    while (true) {
-                        String line;
-                        line = reader.readLine();
-                        if (line == null)
-                            break;
+                    String line;
+                    while ((line = reader.readLine()) != null) {
                         collector.emit(new Values(line));
-                        LOG.trace(Utils.logString("emitPartitionBatch", _compId, txId,"Emitted", line));
+                        LOG.trace(Utils.logString("emitPartitionBatch", _compId, txId,"emitted", line));
                     }
                 }
                 
@@ -159,7 +133,14 @@ public class OpaqueTransactionalBlobSpout
                 //Catch everything that can go wrong.
                 LOG.error(Utils.logString("emitPartitionBatch", _compId, txId,"Error in reading file from S3."), t);
                 currentBatchFailed = true;
+                
+            } finally {
+                if (reader != null)
+                    try { reader.close();} catch (IOException e) {
+                        LOG.error(Utils.logString("emitPartitionBatch", _compId, txId,"Error in closing the data stream."), e);
+                    }
             }
+            
             /** Update the lastMeta **/
             Map newPartitionMeta = new HashMap();
             newPartitionMeta.put("marker", marker);
@@ -174,7 +155,6 @@ public class OpaqueTransactionalBlobSpout
 
         @Override
         public List<SinglePartition> getOrderedPartitions(Map allPartitionInfo) {
-            
             // Need to provide at least one partition, otherwise it spins forever.
             ArrayList<SinglePartition> partition = new ArrayList<SinglePartition>();
             partition.add(new SinglePartition());

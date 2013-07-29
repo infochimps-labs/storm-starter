@@ -1,8 +1,9 @@
-package com.infochimps.storm.spout.s3;
+package com.infochimps.storm.spout.blob;
 
 import java.util.HashMap;
 
-import com.infochimps.storm.spout.s3.OpaqueTransactionalBlobSpout;
+import com.infochimps.storm.spout.blob.OpaqueTransactionalBlobSpout;
+import com.infochimps.storm.spout.blob.impl.S3BlobStore;
 
 import storm.starter.trident.InstrumentedMemoryMapState;
 import storm.trident.TridentState;
@@ -45,7 +46,8 @@ public class S3TestTopology {
         final String TEST_BUCKET_NAME = "s3spout.test.chimpy.us";
         String prefix = "/x/test";
 
-        OpaqueTransactionalBlobSpout spout = new OpaqueTransactionalBlobSpout(TEST_ACCESS_KEY, TEST_SECRET_KEY, TEST_BUCKET_NAME,prefix);
+        BlobStore bs = new S3BlobStore(prefix,TEST_BUCKET_NAME, TEST_ACCESS_KEY, TEST_SECRET_KEY);
+        OpaqueTransactionalBlobSpout spout = new OpaqueTransactionalBlobSpout(bs);
 
         TridentTopology topology = new TridentTopology();
         TridentState wordCounts = topology
