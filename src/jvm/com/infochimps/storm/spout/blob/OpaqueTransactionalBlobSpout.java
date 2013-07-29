@@ -20,6 +20,7 @@ import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.infochimps.storm.spout.blob.impl.DefaultRecordizer;
 
 import storm.trident.operation.TridentCollector;
 import storm.trident.spout.IOpaquePartitionedTridentSpout;
@@ -39,13 +40,21 @@ public class OpaqueTransactionalBlobSpout
 
     BlobStore _bs;
 
-    public OpaqueTransactionalBlobSpout(BlobStore blobStore ) {
+    private Recordizer _rc;
+
+    public OpaqueTransactionalBlobSpout(BlobStore blobStore, Recordizer rc ) {
         _bs = blobStore;
+        _rc = rc;
+    }
+    
+    public OpaqueTransactionalBlobSpout(BlobStore blobStore) {
+        _bs = blobStore;
+        _rc = new DefaultRecordizer();
     }
 
     @Override
     public IOpaquePartitionedTridentSpout.Emitter<Map, SinglePartition, Map> getEmitter(Map conf, TopologyContext context) {
-        return new Emitter(conf, context, _bs);
+        return new Emitter(conf, context, _bs, _rc);
     }
 
     @Override
@@ -67,16 +76,17 @@ public class OpaqueTransactionalBlobSpout
             IOpaquePartitionedTridentSpout.Emitter<Map, SinglePartition, Map> {
      
         private String _compId;
-
         private BlobStore _blobStore;
+        private Recordizer _rec;
 
-        private static final String CHARACTER_SET = "UTF-8";
 
-        public Emitter(Map conf, TopologyContext context, BlobStore blobStore) {
+        public Emitter(Map conf, TopologyContext context, BlobStore blobStore, Recordizer rec) {
              
             _compId = context.getThisComponentId();
             _blobStore = blobStore;
+            _rec = rec;
             _blobStore.initialize();
+            
         }
 
         @Override
@@ -96,7 +106,6 @@ public class OpaqueTransactionalBlobSpout
             }
             
             boolean isDataAvailable = true;
-            BufferedReader reader = null;
             try{
                 LOG.debug(Utils.logString("emitPartitionBatch", _compId, txId, "prev", marker));
                 // Update the marker if the last batch succeeded, otherwise retry.
@@ -117,16 +126,7 @@ public class OpaqueTransactionalBlobSpout
                     context.put("txId", txId);
                     context.put("compId", _compId);
                     
-                    InputStream blobDataStream = _blobStore.getBlob(marker, context);
-                    
-                    
-                    reader = new BufferedReader(new InputStreamReader(blobDataStream, CHARACTER_SET));
-                    
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        collector.emit(new Values(line));
-                        LOG.trace(Utils.logString("emitPartitionBatch", _compId, txId,"emitted", line));
-                    }
+                    _rec.recordize(_blobStore.getBlob(marker, context), collector, context) ;
                 }
                 
             } catch (Throwable t) {
@@ -134,12 +134,7 @@ public class OpaqueTransactionalBlobSpout
                 LOG.error(Utils.logString("emitPartitionBatch", _compId, txId,"Error in reading file from S3."), t);
                 currentBatchFailed = true;
                 
-            } finally {
-                if (reader != null)
-                    try { reader.close();} catch (IOException e) {
-                        LOG.error(Utils.logString("emitPartitionBatch", _compId, txId,"Error in closing the data stream."), e);
-                    }
-            }
+            } 
             
             /** Update the lastMeta **/
             Map newPartitionMeta = new HashMap();
