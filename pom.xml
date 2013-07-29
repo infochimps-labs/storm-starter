@@ -1,12 +1,17 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
   <groupId>com.infochimps</groupId>
-  <artifactId>storm-starter-0.9</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <artifactId>storm-starter</artifactId>
+  <version>0.9.0-wip21-ics</version>
+  <packaging>jar</packaging>
+
+  <name>storm-starter</name>
+  <url>https://github.com/nathanmarz/storm-starter</url>
 
   <properties>
-    <storm.version>0.9.0-wip21</storm.version>
+    <storm.version>0.9.0-wip21-ics</storm.version>
+    <storm.util.version>1.7.0-SNAPSHOT</storm.util.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -16,6 +21,16 @@
       <artifactId>storm-core</artifactId>
       <version>${storm.version}</version>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>storm</groupId>
+      <artifactId>storm-kafka</artifactId>
+      <version>${storm.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.infochimps</groupId>
+      <artifactId>storm-util</artifactId>
+      <version>${storm.util.version}</version>
     </dependency>
     <dependency>
       <groupId>commons-collections</groupId>
