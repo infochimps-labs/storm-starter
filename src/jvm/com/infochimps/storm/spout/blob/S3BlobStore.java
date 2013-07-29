@@ -47,6 +47,11 @@ public class S3BlobStore implements IBlobStore{
     
     @Override
     public String getNextBlobMarker(String currentMarker) {
+        
+        // if marker=BEGINNING start from the beginning.
+        if(currentMarker.equals(IBlobStore.START_FROM_BEGINNING)) currentMarker = null;
+            
+            
         ListObjectsRequest listObjectsRequest = new ListObjectsRequest()
                 .withBucketName(_bucket).withMaxKeys(1)
                 .withMarker(currentMarker).withPrefix(_prefix + "_meta");

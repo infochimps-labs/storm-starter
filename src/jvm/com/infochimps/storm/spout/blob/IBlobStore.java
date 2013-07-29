@@ -12,6 +12,8 @@ import java.util.Map;
  */
 public interface IBlobStore extends Serializable {
     
+    String START_FROM_BEGINNING = "-1";
+
     /**
      * Lazy initialization. Workaround for Storm as some objects might not be serializable. 
      * @return

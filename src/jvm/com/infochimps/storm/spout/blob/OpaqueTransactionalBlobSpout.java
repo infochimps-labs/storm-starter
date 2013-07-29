@@ -1,25 +1,12 @@
 package com.infochimps.storm.spout.blob;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections.map.HashedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.ListObjectsRequest;
-import com.amazonaws.services.s3.model.ObjectListing;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 import storm.trident.operation.TridentCollector;
 import storm.trident.spout.IOpaquePartitionedTridentSpout;
@@ -27,7 +14,6 @@ import storm.trident.spout.ISpoutPartition;
 import storm.trident.topology.TransactionAttempt;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.tuple.Fields;
-import backtype.storm.tuple.Values;
 import backtype.storm.utils.Utils;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -77,6 +63,7 @@ public class OpaqueTransactionalBlobSpout
         private String _compId;
         private IBlobStore _blobStore;
         private IRecordizer _rec;
+        String marker = IBlobStore.START_FROM_BEGINNING;
 
 
         public Emitter(Map conf, TopologyContext context, IBlobStore blobStore, IRecordizer rec) {
@@ -96,9 +83,9 @@ public class OpaqueTransactionalBlobSpout
             /** Get metadata file. **/
             boolean currentBatchFailed = false;
             
-            String marker = null;
             boolean lastBatchFailed = false;
-                    
+            
+            //if lastPartitionMeta is null, retain the previous marker value.
             if(lastPartitionMeta != null){
                 marker = (String) lastPartitionMeta.get("marker");
                 lastBatchFailed = (Boolean) lastPartitionMeta.get("lastBatchFailed");
@@ -130,7 +117,7 @@ public class OpaqueTransactionalBlobSpout
                 
             } catch (Throwable t) {
                 //Catch everything that can go wrong.
-                LOG.error(Utils.logString("emitPartitionBatch", _compId, txId,"Error in reading file from S3."), t);
+                LOG.error(Utils.logString("emitPartitionBatch", _compId, txId,"Error in reading file."), t);
                 currentBatchFailed = true;
                 
             } 
