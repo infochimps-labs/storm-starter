@@ -73,14 +73,16 @@ public class OpaqueTransactionalBlobSpout
         private AmazonS3Client _client;
         private String _S3Bucket;
         private String _S3Prefix;
+        private String _compId;
 
         private static final String CHARACTER_SET = "UTF-8";
 
         public Emitter(Map conf, TopologyContext context, String accessKey, String secretKey, String bucket, String prefix) {
              
             _client = new AmazonS3Client(new BasicAWSCredentials(accessKey, secretKey));
-            this._S3Bucket = bucket;
-            this._S3Prefix = prefix;
+            _S3Bucket = bucket;
+            _S3Prefix = prefix;
+            _compId = context.getThisComponentId();
 
             // This is here to check if the AmazonS3Client is configured properly, if not blow up.
             _client.getBucketAcl(bucket);
@@ -90,6 +92,8 @@ public class OpaqueTransactionalBlobSpout
 
         @Override
         public Map emitPartitionBatch(TransactionAttempt tx, TridentCollector collector, SinglePartition partition, Map lastPartitionMeta) {
+            
+            String txId = ""+tx.getTransactionId();
             
             /** Get metadata file. **/
             boolean currentBatchFailed = false;
@@ -105,7 +109,7 @@ public class OpaqueTransactionalBlobSpout
             
             boolean isDataAvailable = true;
             try{
-                LOG.debug(Utils.logString("emitPartitionBatch", "OpaqueTransactionalBlobSpout", "-", "Old Metadata file", marker));
+                LOG.debug(Utils.logString("emitPartitionBatch", _compId, txId, "prev", marker));
                 
                 // Update the marker if the last batch succeeded, otherwise retry.
                 if(!lastBatchFailed){
@@ -127,7 +131,7 @@ public class OpaqueTransactionalBlobSpout
                         isDataAvailable = false;
                     }
                 } 
-                LOG.debug(Utils.logString("emitPartitionBatch", "OpaqueTransactionalBlobSpout", "-","New Metadata file", marker));
+                LOG.debug(Utils.logString("emitPartitionBatch", _compId, txId ,"new", marker));
                 
                 /** Download the actual file **/
                 if(isDataAvailable){
@@ -135,7 +139,7 @@ public class OpaqueTransactionalBlobSpout
                     //Figure out the actual file name. (Make sure you only remove first _meta and last .meta)
                     
                     String dataKey = marker.substring(0, marker.lastIndexOf(".meta")).replaceAll(_S3Prefix + "_meta", _S3Prefix);
-                    LOG.info(Utils.logString("emitPartitionBatch", "OpaqueTransactionalBlobSpout", "-","Reading S3 file", dataKey));
+                    LOG.info(Utils.logString("emitPartitionBatch", _compId, txId,"Reading S3 file", dataKey));
                     
                     // Read it and send to the topology line by line.
                     S3Object object = _client.getObject(new GetObjectRequest(_bucket, dataKey));
@@ -147,13 +151,13 @@ public class OpaqueTransactionalBlobSpout
                         if (line == null)
                             break;
                         collector.emit(new Values(line));
-                        LOG.trace(Utils.logString("emitPartitionBatch", "OpaqueTransactionalBlobSpout", "-","Emitted", line));
+                        LOG.trace(Utils.logString("emitPartitionBatch", _compId, txId,"Emitted", line));
                     }
                 }
                 
             } catch (Throwable t) {
                 //Catch everything that can go wrong.
-                LOG.error(Utils.logString("emitPartitionBatch", "OpaqueTransactionalBlobSpout", "-","Error in reading file from S3."), t);
+                LOG.error(Utils.logString("emitPartitionBatch", _compId, txId,"Error in reading file from S3."), t);
                 currentBatchFailed = true;
             }
             /** Update the lastMeta **/
