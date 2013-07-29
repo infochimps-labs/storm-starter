@@ -123,7 +123,7 @@ public class WikipediaPageViewCount {
         }
     }
 
-    @SuppressWarnings({ "unchecked", "unused" })
+    @SuppressWarnings({ "unused" })
     public StormTopology buildTopology(String args[]) {
 
         long sleeptime = Long.parseLong(args[0]);
