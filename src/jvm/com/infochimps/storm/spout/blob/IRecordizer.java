@@ -6,7 +6,7 @@ import java.util.Map;
 
 import storm.trident.operation.TridentCollector;
 
-public interface Recordizer extends Serializable {
+public interface IRecordizer extends Serializable {
 
     public boolean recordize(InputStream blobData, TridentCollector collector, Map<String, Object>context);
 }

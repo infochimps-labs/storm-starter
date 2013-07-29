@@ -20,7 +20,6 @@ import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
-import com.infochimps.storm.spout.blob.impl.DefaultRecordizer;
 
 import storm.trident.operation.TridentCollector;
 import storm.trident.spout.IOpaquePartitionedTridentSpout;
@@ -38,16 +37,16 @@ public class OpaqueTransactionalBlobSpout
     
     private static final Logger LOG = LoggerFactory.getLogger(OpaqueTransactionalBlobSpout.class);
 
-    BlobStore _bs;
+    IBlobStore _bs;
 
-    private Recordizer _rc;
+    private IRecordizer _rc;
 
-    public OpaqueTransactionalBlobSpout(BlobStore blobStore, Recordizer rc ) {
+    public OpaqueTransactionalBlobSpout(IBlobStore blobStore, IRecordizer rc ) {
         _bs = blobStore;
         _rc = rc;
     }
     
-    public OpaqueTransactionalBlobSpout(BlobStore blobStore) {
+    public OpaqueTransactionalBlobSpout(IBlobStore blobStore) {
         _bs = blobStore;
         _rc = new DefaultRecordizer();
     }
@@ -76,11 +75,11 @@ public class OpaqueTransactionalBlobSpout
             IOpaquePartitionedTridentSpout.Emitter<Map, SinglePartition, Map> {
      
         private String _compId;
-        private BlobStore _blobStore;
-        private Recordizer _rec;
+        private IBlobStore _blobStore;
+        private IRecordizer _rec;
 
 
-        public Emitter(Map conf, TopologyContext context, BlobStore blobStore, Recordizer rec) {
+        public Emitter(Map conf, TopologyContext context, IBlobStore blobStore, IRecordizer rec) {
              
             _compId = context.getThisComponentId();
             _blobStore = blobStore;

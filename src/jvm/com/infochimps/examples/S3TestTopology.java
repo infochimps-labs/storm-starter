@@ -1,9 +1,4 @@
-package com.infochimps.storm.spout.blob;
-
-import java.util.HashMap;
-
-import com.infochimps.storm.spout.blob.OpaqueTransactionalBlobSpout;
-import com.infochimps.storm.spout.blob.impl.FileBlobStore;
+package com.infochimps.examples;
 
 import storm.starter.trident.InstrumentedMemoryMapState;
 import storm.trident.TridentState;
@@ -19,7 +14,11 @@ import backtype.storm.generated.InvalidTopologyException;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 
-public class FileTestTopology {
+import com.infochimps.storm.spout.blob.IBlobStore;
+import com.infochimps.storm.spout.blob.OpaqueTransactionalBlobSpout;
+import com.infochimps.storm.spout.blob.S3BlobStore;
+
+public class S3TestTopology {
     public static class Split extends BaseFunction {
         @Override
         public void execute(TridentTuple tuple, TridentCollector collector) {
@@ -41,8 +40,12 @@ public class FileTestTopology {
     }
 
     public static void main(String[] args) throws Exception, InvalidTopologyException {
+        final String TEST_ACCESS_KEY = "AKIAIAVKQWKGWHTUSPWA"; // infochimps:s3testuser
+        final String TEST_SECRET_KEY = "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"; // infochimps:s3testuser
+        final String TEST_BUCKET_NAME = "s3spout.test.chimpy.us";
+        String prefix = "/x/test";
 
-        BlobStore bs = new FileBlobStore("data");
+        IBlobStore bs = new S3BlobStore(prefix,TEST_BUCKET_NAME, TEST_ACCESS_KEY, TEST_SECRET_KEY);
         OpaqueTransactionalBlobSpout spout = new OpaqueTransactionalBlobSpout(bs);
 
         TridentTopology topology = new TridentTopology();

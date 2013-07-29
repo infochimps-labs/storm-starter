@@ -1,4 +1,4 @@
-package com.infochimps.storm.spout.blob.impl;
+package com.infochimps.storm.spout.blob;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,9 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.infochimps.storm.spout.blob.BlobStore;
 
-public class FileBlobStore implements BlobStore{
+public class FileBlobStore implements IBlobStore{
 
     private List<String> ids = new ArrayList<String>();
     private int counter = 0;

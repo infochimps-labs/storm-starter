@@ -1,4 +1,4 @@
-package com.infochimps.storm.spout.blob.impl;
+package com.infochimps.storm.spout.blob;
 
 import java.io.InputStream;
 import java.util.List;
@@ -16,9 +16,8 @@ import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
-import com.infochimps.storm.spout.blob.BlobStore;
 
-public class S3BlobStore implements BlobStore{
+public class S3BlobStore implements IBlobStore{
     
     private static final Logger LOG = LoggerFactory.getLogger(S3BlobStore.class);
 

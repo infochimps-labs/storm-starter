@@ -1,4 +1,4 @@
-package com.infochimps.storm.spout.blob.impl;
+package com.infochimps.storm.spout.blob;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,9 +16,8 @@ import storm.trident.operation.TridentCollector;
 import backtype.storm.tuple.Values;
 import backtype.storm.utils.Utils;
 
-import com.infochimps.storm.spout.blob.Recordizer;
 
-public class DefaultRecordizer implements Recordizer{
+public class DefaultRecordizer implements IRecordizer{
     private static final String CHARACTER_SET = "UTF-8";
     private static final Logger LOG = LoggerFactory.getLogger(DefaultRecordizer.class);
 

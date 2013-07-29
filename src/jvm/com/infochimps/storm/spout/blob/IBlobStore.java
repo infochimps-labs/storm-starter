@@ -10,7 +10,7 @@ import java.util.Map;
  * @author sa
  *
  */
-public interface BlobStore extends Serializable {
+public interface IBlobStore extends Serializable {
     
     /**
      * Lazy initialization. Workaround for Storm as some objects might not be serializable. 
