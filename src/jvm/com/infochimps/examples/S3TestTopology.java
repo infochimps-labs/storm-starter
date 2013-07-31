@@ -14,48 +14,55 @@ import backtype.storm.generated.InvalidTopologyException;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 
-import com.infochimps.storm.trident.spout.FileBlobStore;
 import com.infochimps.storm.trident.spout.IBlobStore;
 import com.infochimps.storm.trident.spout.OpaqueTransactionalBlobSpout;
+import com.infochimps.storm.trident.spout.S3BlobStore;
 
-public class FileTestTopology {
+public class S3TestTopology {
     public static class Split extends BaseFunction {
         @Override
         public void execute(TridentTuple tuple, TridentCollector collector) {
             String sentence = tuple.getString(0);
 
-            System.out.println("Split execute called on : " + sentence + tuple);
+            System.out.println("Split execute called yo: " + sentence + tuple); 
             // try {
             //     Thread.sleep(3);
             // } catch (InterruptedException e) {
             //     e.printStackTrace();
             // }
-            for (String word : sentence.split(" ")) {
+            for (String word : sentence.split(" ")) { 
                 collector.emit(new Values(word));
             }
         }
     }
 
     public static void main(String[] args) throws Exception, InvalidTopologyException {
-        IBlobStore bs = new FileBlobStore("/Users/sa/code/storm-starter/data/small");
+        final String TEST_ACCESS_KEY = ExampleConfig.getString("aws.access.key"); // infochimps:s3testuser 
+        final String TEST_SECRET_KEY = ExampleConfig.getString("aws.secret.key"); // infochimps:s3testuser 
+        final String TEST_BUCKET_NAME = ExampleConfig.getString("aws.bucket.name"); 
+        String prefix = ExampleConfig.getString("aws.prefix"); 
+
+        
+        System.out.println(TEST_ACCESS_KEY + "--" + TEST_SECRET_KEY );
+        IBlobStore bs = new S3BlobStore(prefix,TEST_BUCKET_NAME, TEST_ACCESS_KEY, TEST_SECRET_KEY);
         OpaqueTransactionalBlobSpout spout = new OpaqueTransactionalBlobSpout(bs);
 
         TridentTopology topology = new TridentTopology();
         TridentState wordCounts = topology
-            .newStream("spout1", spout)
+            .newStream("spout1", spout) 
             .parallelismHint(1)
-            .each(new Fields("line"), new Split(), new Fields("word"))
-            .groupBy(new Fields("word"))
-            .persistentAggregate(new InstrumentedMemoryMapState.Factory(), new Count(), new Fields("count"))
+            .each(new Fields("line"), new Split(), new Fields("word"))  //$NON-NLS-2$
+            .groupBy(new Fields("word")) 
+            .persistentAggregate(new InstrumentedMemoryMapState.Factory(), new Count(), new Fields("count")) 
             .parallelismHint(1);
 
         Config conf = new Config();
         conf.setMessageTimeoutSecs(10);
         // conf.setMaxSpoutPending(3);
-        System.out.println("Topology created");
+        System.out.println("Topology created"); 
         if (args.length == 0) {
             LocalCluster cluster = new LocalCluster();
-            cluster.submitTopology("wordCounter", conf, topology.build());
+            cluster.submitTopology("wordCounter", conf, topology.build()); 
         } else {
             conf.setNumWorkers(3);
             StormSubmitter.submitTopology(args[0], conf, topology.build());
