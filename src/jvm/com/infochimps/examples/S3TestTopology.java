@@ -1,5 +1,8 @@
 package com.infochimps.examples;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import storm.starter.trident.InstrumentedMemoryMapState;
 import storm.trident.TridentState;
 import storm.trident.TridentTopology;
@@ -20,11 +23,14 @@ import com.infochimps.storm.trident.spout.S3BlobStore;
 
 public class S3TestTopology {
     public static class Split extends BaseFunction {
+        private static final Logger LOG = LoggerFactory.getLogger(S3TestTopology.class);
+
         @Override
         public void execute(TridentTuple tuple, TridentCollector collector) {
             String sentence = tuple.getString(0);
 
             System.out.println("Split execute called yo: " + sentence + tuple); 
+            LOG.info("Split execute called yo: " + sentence + tuple); 
             // try {
             //     Thread.sleep(3);
             // } catch (InterruptedException e) {
@@ -49,7 +55,7 @@ public class S3TestTopology {
 
         TridentTopology topology = new TridentTopology();
         TridentState wordCounts = topology
-            .newStream("spout1", spout) 
+            .newStream("s3spout1", spout) 
             .parallelismHint(1)
             .each(new Fields("line"), new Split(), new Fields("word"))  //$NON-NLS-2$
             .groupBy(new Fields("word")) 
