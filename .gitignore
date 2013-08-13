@@ -1,5 +1,6 @@
 .settings
 src/jvm/config.properties
+src/jvm/_raw
 .lein*
 classes/
 lib/

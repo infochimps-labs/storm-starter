@@ -25,10 +25,11 @@ public class WukongRecordizerTestTopology {
     public static class CombineMetaData extends BaseFunction {
         @Override
         public void execute(TridentTuple tuple, TridentCollector collector) {
-            String content = tuple.getString(0);
-            String metadata = tuple.getString(1);
+            String content = tuple.getStringByField("content");
+            String metadata = tuple.getStringByField("metadata");
+            Integer lineNumber = tuple.getIntegerByField("linenumber");
 
-            System.out.println(String.format("CombineMetaData called - %s\t%s \n", metadata, content));
+            System.out.println(String.format("CombineMetaData called - %s\t%s\t%s\n", metadata, content, lineNumber));
             // try {
             //     Thread.sleep(3);
             // } catch (InterruptedException e) {
