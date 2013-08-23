@@ -19,11 +19,13 @@ public class GenerateS3BlobFixtures {
         final String TEST_ACCESS_KEY = ExampleConfig.getString("aws.access.key"); // infochimps:s3testuser 
         final String TEST_SECRET_KEY = ExampleConfig.getString("aws.secret.key"); // infochimps:s3testuser 
         final String TEST_BUCKET_NAME = ExampleConfig.getString("aws.bucket.name"); 
+        final String TEST_ENDPOINT = ExampleConfig.getString("aws.endpoint.name"); 
+
         String _prefix = ExampleConfig.getString("aws.prefix"); 
-        String _dir = "data/small";
+        String _dir = "data";
 
         AmazonS3Client client = new AmazonS3Client(new BasicAWSCredentials(TEST_ACCESS_KEY, TEST_SECRET_KEY));
-
+        client.setEndpoint(TEST_ENDPOINT);
         File folder = new File(_dir); 
         Collection<File> listOfFiles = FileUtils.listFiles(folder, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
 

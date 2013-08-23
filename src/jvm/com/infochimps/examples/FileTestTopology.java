@@ -37,7 +37,7 @@ public class FileTestTopology {
     }
 
     public static void main(String[] args) throws Exception, InvalidTopologyException {
-        IBlobStore bs = new FileBlobStore("/Users/sa/code/storm-starter/data/small");
+        IBlobStore bs = new FileBlobStore("/Users/sa/code/storm-starter/data");
         OpaqueTransactionalBlobSpout spout = new OpaqueTransactionalBlobSpout(bs);
 
         TridentTopology topology = new TridentTopology();

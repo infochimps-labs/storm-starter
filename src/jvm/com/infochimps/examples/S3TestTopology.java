@@ -20,6 +20,7 @@ import backtype.storm.tuple.Values;
 import com.infochimps.storm.trident.spout.IBlobStore;
 import com.infochimps.storm.trident.spout.OpaqueTransactionalBlobSpout;
 import com.infochimps.storm.trident.spout.S3BlobStore;
+import com.infochimps.storm.trident.spout.StartPolicy;
 
 public class S3TestTopology {
     public static class Split extends BaseFunction {
@@ -46,12 +47,15 @@ public class S3TestTopology {
         final String TEST_ACCESS_KEY = ExampleConfig.getString("aws.access.key"); // infochimps:s3testuser 
         final String TEST_SECRET_KEY = ExampleConfig.getString("aws.secret.key"); // infochimps:s3testuser 
         final String TEST_BUCKET_NAME = ExampleConfig.getString("aws.bucket.name"); 
+        final String TEST_ENDPOINT = ExampleConfig.getString("aws.endpoint.name"); 
         String prefix = ExampleConfig.getString("aws.prefix"); 
 
         
         System.out.println(TEST_ACCESS_KEY + "--" + TEST_SECRET_KEY );
-        IBlobStore bs = new S3BlobStore(prefix,TEST_BUCKET_NAME, TEST_ACCESS_KEY, TEST_SECRET_KEY);
-        OpaqueTransactionalBlobSpout spout = new OpaqueTransactionalBlobSpout(bs);
+        IBlobStore bs = new S3BlobStore(prefix,TEST_BUCKET_NAME,TEST_ENDPOINT, TEST_ACCESS_KEY, TEST_SECRET_KEY);
+//        OpaqueTransactionalBlobSpout spout = new OpaqueTransactionalBlobSpout(bs, StartPolicy.RESUME, null);
+        OpaqueTransactionalBlobSpout spout = new OpaqueTransactionalBlobSpout(bs, StartPolicy.EARLIEST, null);
+//        OpaqueTransactionalBlobSpout spout = new OpaqueTransactionalBlobSpout(bs, StartPolicy.EXPLICIT, "/x/y_meta/1377207157853/b.txt.meta");
 
         TridentTopology topology = new TridentTopology();
         TridentState wordCounts = topology
