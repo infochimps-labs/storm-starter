@@ -37,9 +37,9 @@ public class WukongTestTopology {
 
 			line += 1;
 			// System.out.print(".");
-			long l = 1500;
+			long l = 10000;
 			if (line % l == 0)
-				System.out.print(l + " lines read.");
+				System.out.print(line + " lines read.");
 
 			// System.out.println(String.format("CombineMetaData called - %s\t%s\t%s\n",
 			// metadata, content, lineNumber));
@@ -76,6 +76,11 @@ public class WukongTestTopology {
 		String TEST_BUCKET_NAME = ExampleConfig.getString("aws.bucket.name");
 		String TEST_ENDPOINT = ExampleConfig.getString("aws.endpoint.name");
 		String prefix = ExampleConfig.getString("aws.prefix");
+		
+		int timeout = Integer.getInteger(ExampleConfig.getString("storm.timeout"));
+		int workers = Integer.getInteger(ExampleConfig.getString("storm.workers"));
+		int combineParallelism = Integer.getInteger(ExampleConfig.getString("storm.combine.parallelism"));
+		int wukongParallelism = Integer.getInteger(ExampleConfig.getString("storm.wukong.parallelism"));
 
 		String kafkaTopic = ExampleConfig.getString("kafka.topic");
 		String zkHosts = ExampleConfig.getString("zk.hosts");// "tv-control-zk-0.tv.chimpy.us,tv-control-zk-1.tv.chimpy.us,tv-control-zk-2.tv.chimpy.us";
@@ -97,7 +102,8 @@ public class WukongTestTopology {
 
 		TridentTopology topology = new TridentTopology();
 
-		Stream source = topology.newStream("spout1", spout).each(rc.getFields(), new CombineMetaData(), new Fields("str"));
+		Stream source = topology.newStream("spout1", spout);
+		Stream combine = source.each(rc.getFields(), new CombineMetaData(), new Fields("str")).parallelismHint(combineParallelism);
 
 		if (args[1].equals("wu")) {
 
@@ -105,25 +111,25 @@ public class WukongTestTopology {
 			String wukongDir = "/home/arrawatia/tv/";
 			String env = "production";
 			System.setProperty("wukong.command", "bash -c bundle exec wu-bolt identity");
-			Stream wukong = source.each(new Fields("str"), new WuFunction(dataFlowName, wukongDir, env), new Fields("_wukong")).parallelismHint(10);
+			Stream wukong = combine.each(new Fields("str"), new WuFunction(dataFlowName, wukongDir, env), new Fields("_wukong")).parallelismHint(wukongParallelism);
 
 			wukong.partitionPersist(new KafkaState.Factory(kafkaTopic, zkHosts), new Fields("_wukong"), new KafkaState.Updater());
 		} else {
 
-			source.partitionPersist(new KafkaState.Factory(kafkaTopic, zkHosts), new Fields("str"), new KafkaState.Updater());
+			combine.partitionPersist(new KafkaState.Factory(kafkaTopic, zkHosts), new Fields("str"), new KafkaState.Updater());
 		}
 
 		topology.build();
 
 		Config conf = new Config();
-		conf.setMessageTimeoutSecs(10000);
+		conf.setMessageTimeoutSecs(timeout);
 		// conf.setMaxSpoutPending(3);
 		System.out.println("Topology created");
 		if (args.length == 0) {
 			LocalCluster cluster = new LocalCluster();
 			cluster.submitTopology("wordCounter", conf, topology.build());
 		} else {
-			conf.setNumWorkers(10);
+			conf.setNumWorkers(workers);
 			StormSubmitter.submitTopology(args[0], conf, topology.build());
 		}
 	}
