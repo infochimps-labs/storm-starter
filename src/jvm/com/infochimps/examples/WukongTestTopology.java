@@ -71,19 +71,23 @@ public class WukongTestTopology {
 
 	public static void main(String[] args) throws Exception, InvalidTopologyException {
 
+		System.out.println(ExampleConfig.getAll());
 		String TEST_ACCESS_KEY = ExampleConfig.getString("aws.access.key"); // infochimps:s3testuser
 		String TEST_SECRET_KEY = ExampleConfig.getString("aws.secret.key"); // infochimps:s3testuser
 		String TEST_BUCKET_NAME = ExampleConfig.getString("aws.bucket.name");
 		String TEST_ENDPOINT = ExampleConfig.getString("aws.endpoint.name");
 		String prefix = ExampleConfig.getString("aws.prefix");
 		
-		int timeout = Integer.getInteger(ExampleConfig.getString("storm.timeout"));
-		int workers = Integer.getInteger(ExampleConfig.getString("storm.workers"));
-		int combineParallelism = Integer.getInteger(ExampleConfig.getString("storm.combine.parallelism"));
-		int wukongParallelism = Integer.getInteger(ExampleConfig.getString("storm.wukong.parallelism"));
+		
+		int workers = Integer.parseInt(ExampleConfig.getString("storm.workers"));
+		int timeout = Integer.parseInt(ExampleConfig.getString("storm.timeout"));
+		int combineParallelism = Integer.parseInt(ExampleConfig.getString("storm.combine.parallelism"));
+		int wukongParallelism = Integer.parseInt(ExampleConfig.getString("storm.wukong.parallelism"));
 
 		String kafkaTopic = ExampleConfig.getString("kafka.topic");
 		String zkHosts = ExampleConfig.getString("zk.hosts");// "tv-control-zk-0.tv.chimpy.us,tv-control-zk-1.tv.chimpy.us,tv-control-zk-2.tv.chimpy.us";
+		
+		
 
 		IRecordizer rc = new WukongRecordizer();
 
