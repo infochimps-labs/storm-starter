@@ -29,13 +29,17 @@ public class WukongTestTopology {
 	public static class CombineMetaData extends BaseFunction {
 		long line = 0;
 		long totallines = 0;
+		String oldMetadata = "";
 		@Override
 		public void execute(TridentTuple tuple, TridentCollector collector) {
 			String content = tuple.getStringByField("content");
 			String metadata = tuple.getStringByField("metadata");
 			Integer lineNumber = tuple.getIntegerByField("linenumber");
 
-			if(lineNumber == 1) line = 0;
+			if(!oldMetadata.equals(metadata)) {
+				line = 0;
+				oldMetadata = metadata;
+			}
 			line += 1;
 			totallines += 1;
 			// System.out.print(".");
