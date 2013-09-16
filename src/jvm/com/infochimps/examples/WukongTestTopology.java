@@ -122,7 +122,7 @@ public class WukongTestTopology {
 
 		TridentTopology topology = new TridentTopology();
 
-		Stream source = topology.newStream("spout1", spout).shuffle();
+		Stream source = topology.newStream("spout1", spout).parallelismHint(1).shuffle();
 		Stream combine = source.each(rc.getFields(), new CombineMetaData(), new Fields("str")).parallelismHint(combineParallelism);
 
 		if (args[1].equals("wu")) {
