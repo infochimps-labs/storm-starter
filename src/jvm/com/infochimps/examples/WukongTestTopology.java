@@ -28,18 +28,20 @@ import com.infochimps.storm.wukong.WuFunction;
 public class WukongTestTopology {
 	public static class CombineMetaData extends BaseFunction {
 		long line = 0;
-
+		long totallines = 0;
 		@Override
 		public void execute(TridentTuple tuple, TridentCollector collector) {
 			String content = tuple.getStringByField("content");
 			String metadata = tuple.getStringByField("metadata");
 			Integer lineNumber = tuple.getIntegerByField("linenumber");
 
+			if(lineNumber == 1) line = 0;
 			line += 1;
+			totallines += 1;
 			// System.out.print(".");
 			long l = 10000;
 			if (line % l == 0)
-				System.out.print(line + " lines read.");
+				System.out.print(line + " lines read. Total=" + totallines);
 
 			// System.out.println(String.format("CombineMetaData called - %s\t%s\t%s\n",
 			// metadata, content, lineNumber));
