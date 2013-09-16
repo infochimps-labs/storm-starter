@@ -80,6 +80,8 @@ public class WukongTestTopology {
 		
 		
 		int startPolicy = Integer.parseInt(ExampleConfig.getString("WukongTestTopology.startPolicy"));
+		String explicitStartMarker = ExampleConfig.getString("WukongTestTopology.explicit.marker");
+
 		int workers = Integer.parseInt(ExampleConfig.getString("storm.workers"));
 		int timeout = Integer.parseInt(ExampleConfig.getString("storm.timeout"));
 		int combineParallelism = Integer.parseInt(ExampleConfig.getString("storm.combine.parallelism"));
@@ -111,10 +113,11 @@ public class WukongTestTopology {
 			break;
 		case 3:
 			
-			 spout = new OpaqueTransactionalBlobSpout(bs, rc, StartPolicy.RESUME, null);
+			 spout = new OpaqueTransactionalBlobSpout(bs, rc, StartPolicy.EXPLICIT, explicitStartMarker);
 			break;
 
 		default:
+			spout = new OpaqueTransactionalBlobSpout(bs, rc, StartPolicy.RESUME, null);
 			break;
 		}
 //		OpaqueTransactionalBlobSpout spout = new OpaqueTransactionalBlobSpout(bs, rc, StartPolicy.RESUME, null);
@@ -125,7 +128,7 @@ public class WukongTestTopology {
 		Stream source = topology.newStream("spout1", spout).parallelismHint(1).shuffle();
 		Stream combine = source.each(rc.getFields(), new CombineMetaData(), new Fields("str")).parallelismHint(combineParallelism);
 
-		if (args[1].equals("wu")) {
+		if (false){//args[1].equals("wu")) {
 
 			String dataFlowName = "identity";
 			String wukongDir = "/home/arrawatia/tv/";
