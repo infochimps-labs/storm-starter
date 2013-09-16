@@ -79,6 +79,7 @@ public class WukongTestTopology {
 		String prefix = ExampleConfig.getString("aws.prefix");
 		
 		
+		int startPolicy = Integer.parseInt(ExampleConfig.getString("WukongTestTopology.startPolicy"));
 		int workers = Integer.parseInt(ExampleConfig.getString("storm.workers"));
 		int timeout = Integer.parseInt(ExampleConfig.getString("storm.timeout"));
 		int combineParallelism = Integer.parseInt(ExampleConfig.getString("storm.combine.parallelism"));
@@ -96,13 +97,28 @@ public class WukongTestTopology {
 		// File Store
 //		String dir = "/Users/sa/code/customers/tv/voter_files/test";
 //		IBlobStore bs = new FileBlobStore(dir);
+		
+		
+		OpaqueTransactionalBlobSpout spout =null;
+		switch (startPolicy) {
+		case 1:
+			
+			 spout = new OpaqueTransactionalBlobSpout(bs, rc, StartPolicy.EARLIEST, null);
+			break;
+		case 2:
+			
+			 spout = new OpaqueTransactionalBlobSpout(bs, rc, StartPolicy.LATEST, null);
+			break;
+		case 3:
+			
+			 spout = new OpaqueTransactionalBlobSpout(bs, rc, StartPolicy.RESUME, null);
+			break;
 
-//		OpaqueTransactionalBlobSpout spout = new OpaqueTransactionalBlobSpout(bs, rc);
-		OpaqueTransactionalBlobSpout spout = new OpaqueTransactionalBlobSpout(bs, rc, StartPolicy.EARLIEST, null);
+		default:
+			break;
+		}
 //		OpaqueTransactionalBlobSpout spout = new OpaqueTransactionalBlobSpout(bs, rc, StartPolicy.RESUME, null);
-//		OpaqueTransactionalBlobSpout spout = new OpaqueTransactionalBlobSpout(bs, rc, StartPolicy.EXPLICIT,
 //				"piryx/donations_meta/2013/09/03/donations-20130903-154046-0-donations-Ryan for Congress (WI-01).converted.csv.meta");
-//		OpaqueTransactionalBlobSpout spout = new OpaqueTransactionalBlobSpout(bs, rc, StartPolicy.LATEST, null);
 
 		TridentTopology topology = new TridentTopology();
 
