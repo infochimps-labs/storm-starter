@@ -95,8 +95,15 @@ public class WukongTestTopology {
 
 		String kafkaTopic = ExampleConfig.getString("kafka.topic");
 		String zkHosts = ExampleConfig.getString("zk.hosts");// "tv-control-zk-0.tv.chimpy.us,tv-control-zk-1.tv.chimpy.us,tv-control-zk-2.tv.chimpy.us";
+		String spoutname = "spout1";
 		
-		
+		String isWukongEnabled = "false";
+		if (args.length > 0){
+			spoutname = args[0];
+			 isWukongEnabled  = args[1] ;
+			startPolicy = Integer.parseInt(args[2]);
+			explicitStartMarker = args[4];
+		}
 
 		IRecordizer rc = new WukongRecordizer();
 
@@ -131,10 +138,10 @@ public class WukongTestTopology {
 
 		TridentTopology topology = new TridentTopology();
 
-		Stream source = topology.newStream("spout1", spout).parallelismHint(1).shuffle();
+		Stream source = topology.newStream(spoutname, spout).parallelismHint(1).shuffle();
 		Stream combine = source.each(rc.getFields(), new CombineMetaData(), new Fields("str")).parallelismHint(combineParallelism);
 
-		if (false){//args[1].equals("wu")) {
+		if (isWukongEnabled.equals("true")) {
 
 			String dataFlowName = "identity";
 			String wukongDir = "/home/arrawatia/tv/";
