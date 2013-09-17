@@ -102,7 +102,7 @@ public class WukongTestTopology {
 			spoutname = args[0];
 			 isWukongEnabled  = args[1] ;
 			startPolicy = Integer.parseInt(args[2]);
-			explicitStartMarker = args[4];
+			explicitStartMarker = args[3];
 		}
 
 		IRecordizer rc = new WukongRecordizer();
