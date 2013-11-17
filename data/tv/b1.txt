@@ -1,0 +1,8 @@
+voter1;bbb BBB bbb BBB bbb
+voter1;BBBBBBB bbbbbbb BBBBBBBB bbbbbbb
+voter1;zzz BBB bbb BBB bbb
+voter2;zzzz bbbbbbb BBBBBBBB bbbbbbb
+voter3;bbb BBB bbb BBB bbb
+voter4;asdsaBBBBBBB bbbbbbb BBBBBBBB bbbbbbb
+voter4;dsadabbb BBB bbb BBB bbb
+voter4;dsadaBBBBBBB bbbbbbb BBBBBBBB bbbbbbb
