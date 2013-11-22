@@ -25,13 +25,22 @@ public class TridentWordCount {
         @Override
         public void execute(TridentTuple tuple, TridentCollector collector) {
             // System.out.println("Split execute called");
-            LOG.info("splitting: " + tuple.toString());
+//            LOG.info("splitting: " + tuple.toString());
 
             String sentence = tuple.getString(0);
             for (String word : sentence.split(" ")) {
                 collector.emit(new Values(word));
             }
         }
+    }
+    public static class Echo extends BaseFunction {
+    	@Override
+    	public void execute(TridentTuple tuple, TridentCollector collector) {
+    		// System.out.println("Split execute called");
+    		LOG.info("echo: " + tuple.toString());
+    		
+    		
+    	}
     }
 
     public static StormTopology buildTopology(LocalDRPC drpc) {
@@ -51,8 +60,21 @@ public class TridentWordCount {
                 .each(new Fields("sentence"), new Split(), new Fields("word"))
                 .groupBy(new Fields("word"))
                 .persistentAggregate(new InstrumentedMemoryMapState.Factory(),
-                        new Count(), new Fields("count")).parallelismHint(1);
+                        new Count(), new Fields("count"))
+                 .newValuesStream().each(new Fields("count","word"), new Echo(), new Fields("abc"))
+                  .groupBy(new Fields("abc"))
+                .persistentAggregate(new InstrumentedMemoryMapState.Factory(),
+                        new Count(), new Fields("countabc"))
+;
 
+        // topology.newDRPCStream("words", drpc)
+        // .each(new Fields("args"), new Split(), new Fields("word"))
+        // .groupBy(new Fields("word"))
+        // .stateQuery(wordCounts, new Fields("word"), new MapGet(), new
+        // Fields("count"))
+        // .each(new Fields("count"), new FilterNull())
+        // .aggregate(new Fields("count"), new Sum(), new Fields("sum"))
+        // ;
         // topology.newDRPCStream("words", drpc)
         // .each(new Fields("args"), new Split(), new Fields("word"))
         // .groupBy(new Fields("word"))

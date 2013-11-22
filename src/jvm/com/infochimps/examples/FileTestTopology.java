@@ -17,6 +17,7 @@ import backtype.storm.tuple.Values;
 import com.infochimps.storm.trident.spout.FileBlobStore;
 import com.infochimps.storm.trident.spout.IBlobStore;
 import com.infochimps.storm.trident.spout.OpaqueTransactionalBlobSpout;
+import com.infochimps.storm.trident.spout.StartPolicy;
 
 public class FileTestTopology {
     public static class Split extends BaseFunction {
@@ -38,7 +39,7 @@ public class FileTestTopology {
 
     public static void main(String[] args) throws Exception, InvalidTopologyException {
         IBlobStore bs = new FileBlobStore("/Users/sa/code/storm-starter/data");
-        OpaqueTransactionalBlobSpout spout = new OpaqueTransactionalBlobSpout(bs);
+        OpaqueTransactionalBlobSpout spout = new OpaqueTransactionalBlobSpout(bs, StartPolicy.EARLIEST, null);
 
         TridentTopology topology = new TridentTopology();
         TridentState wordCounts = topology

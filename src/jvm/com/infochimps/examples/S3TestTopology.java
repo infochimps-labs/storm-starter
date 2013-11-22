@@ -18,25 +18,31 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 
 import com.infochimps.storm.trident.spout.IBlobStore;
+import com.infochimps.storm.trident.spout.IRecordizer;
 import com.infochimps.storm.trident.spout.OpaqueTransactionalBlobSpout;
 import com.infochimps.storm.trident.spout.S3BlobStore;
 import com.infochimps.storm.trident.spout.StartPolicy;
+import com.infochimps.storm.trident.spout.WukongRecordizer;
 
 public class S3TestTopology {
     public static class Split extends BaseFunction {
         private static final Logger LOG = LoggerFactory.getLogger(S3TestTopology.class);
 
+        int line=0;
         @Override
         public void execute(TridentTuple tuple, TridentCollector collector) {
             String sentence = tuple.getString(0);
 
-            System.out.println("Split execute called yo: " + sentence + tuple); 
-            LOG.info("Split execute called yo: " + sentence + tuple); 
-            // try {
-            //     Thread.sleep(3);
-            // } catch (InterruptedException e) {
-            //     e.printStackTrace();
-            // }
+           System.out.println("Split execute called yo: " + sentence); 
+//            LOG.info("Split execute called yo: " + sentence + tuple); 
+            line +=1;
+//            System.out.print(".");
+//            if(line % 150 == 0)System.out.println("");
+             try {
+                 Thread.sleep(100);
+             } catch (InterruptedException e) {
+                 e.printStackTrace();
+             }
             for (String word : sentence.split(" ")) { 
                 collector.emit(new Values(word));
             }
@@ -52,9 +58,12 @@ public class S3TestTopology {
 
         
         System.out.println(TEST_ACCESS_KEY + "--" + TEST_SECRET_KEY );
+        IRecordizer rc = new WukongRecordizer();
+
         IBlobStore bs = new S3BlobStore(prefix,TEST_BUCKET_NAME,TEST_ENDPOINT, TEST_ACCESS_KEY, TEST_SECRET_KEY);
 //        OpaqueTransactionalBlobSpout spout = new OpaqueTransactionalBlobSpout(bs, StartPolicy.RESUME, null);
         OpaqueTransactionalBlobSpout spout = new OpaqueTransactionalBlobSpout(bs, StartPolicy.EARLIEST, null);
+//        OpaqueTransactionalBlobSpout spout = new OpaqueTransactionalBlobSpout(bs);
 //        OpaqueTransactionalBlobSpout spout = new OpaqueTransactionalBlobSpout(bs, StartPolicy.EXPLICIT, "/x/y_meta/1377207157853/b.txt.meta");
 
         TridentTopology topology = new TridentTopology();

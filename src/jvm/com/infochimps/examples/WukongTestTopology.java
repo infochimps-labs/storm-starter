@@ -30,20 +30,21 @@ public class WukongTestTopology {
 		long line = 0;
 		long totallines = 0;
 		String oldMetadata = "";
+
 		@Override
 		public void execute(TridentTuple tuple, TridentCollector collector) {
 			String content = tuple.getStringByField("content");
 			String metadata = tuple.getStringByField("metadata");
 			Integer lineNumber = tuple.getIntegerByField("linenumber");
 
-			if(!oldMetadata.equals(metadata)) {
+			if (!oldMetadata.equals(metadata)) {
 				line = 0;
 				oldMetadata = metadata;
 			}
 			line += 1;
 			totallines += 1;
 			// System.out.print(".");
-			long l = 10000;
+			long l = 5000;
 			if (line % l == 0)
 				System.out.print(line + " lines read. Total=" + totallines);
 
@@ -83,8 +84,7 @@ public class WukongTestTopology {
 		String TEST_BUCKET_NAME = ExampleConfig.getString("aws.bucket.name");
 		String TEST_ENDPOINT = ExampleConfig.getString("aws.endpoint.name");
 		String prefix = ExampleConfig.getString("aws.prefix");
-		
-		
+
 		int startPolicy = Integer.parseInt(ExampleConfig.getString("WukongTestTopology.startPolicy"));
 		String explicitStartMarker = ExampleConfig.getString("WukongTestTopology.explicit.marker");
 
@@ -96,11 +96,11 @@ public class WukongTestTopology {
 		String kafkaTopic = ExampleConfig.getString("kafka.topic");
 		String zkHosts = ExampleConfig.getString("zk.hosts");// "tv-control-zk-0.tv.chimpy.us,tv-control-zk-1.tv.chimpy.us,tv-control-zk-2.tv.chimpy.us";
 		String spoutname = "spout1";
-		
+
 		String isWukongEnabled = "false";
-		if (args.length > 0){
+		if (args.length > 0) {
 			spoutname = args[0];
-			 isWukongEnabled  = args[1] ;
+			isWukongEnabled = args[1];
 			startPolicy = Integer.parseInt(args[2]);
 			explicitStartMarker = args[3];
 		}
@@ -110,31 +110,31 @@ public class WukongTestTopology {
 		IBlobStore bs = new S3BlobStore(prefix, TEST_BUCKET_NAME, TEST_ENDPOINT, TEST_ACCESS_KEY, TEST_SECRET_KEY);
 
 		// File Store
-//		String dir = "/Users/sa/code/customers/tv/voter_files/test";
-//		IBlobStore bs = new FileBlobStore(dir);
-		
-		
-		OpaqueTransactionalBlobSpout spout =null;
+		// String dir = "/Users/sa/code/customers/tv/voter_files/test";
+		// IBlobStore bs = new FileBlobStore(dir);
+
+		OpaqueTransactionalBlobSpout spout = null;
 		switch (startPolicy) {
 		case 1:
-			
-			 spout = new OpaqueTransactionalBlobSpout(bs, rc, StartPolicy.EARLIEST, null);
+
+			spout = new OpaqueTransactionalBlobSpout(bs, rc, StartPolicy.EARLIEST, null);
 			break;
 		case 2:
-			
-			 spout = new OpaqueTransactionalBlobSpout(bs, rc, StartPolicy.LATEST, null);
+
+			spout = new OpaqueTransactionalBlobSpout(bs, rc, StartPolicy.LATEST, null);
 			break;
 		case 3:
-			
-			 spout = new OpaqueTransactionalBlobSpout(bs, rc, StartPolicy.EXPLICIT, explicitStartMarker);
+
+			spout = new OpaqueTransactionalBlobSpout(bs, rc, StartPolicy.EXPLICIT, explicitStartMarker);
 			break;
 
 		default:
 			spout = new OpaqueTransactionalBlobSpout(bs, rc, StartPolicy.RESUME, null);
 			break;
 		}
-//		OpaqueTransactionalBlobSpout spout = new OpaqueTransactionalBlobSpout(bs, rc, StartPolicy.RESUME, null);
-//				"piryx/donations_meta/2013/09/03/donations-20130903-154046-0-donations-Ryan for Congress (WI-01).converted.csv.meta");
+		// OpaqueTransactionalBlobSpout spout = new
+		// OpaqueTransactionalBlobSpout(bs, rc, StartPolicy.RESUME, null);
+		// "piryx/donations_meta/2013/09/03/donations-20130903-154046-0-donations-Ryan for Congress (WI-01).converted.csv.meta");
 
 		TridentTopology topology = new TridentTopology();
 
@@ -144,9 +144,10 @@ public class WukongTestTopology {
 		if (isWukongEnabled.equals("true")) {
 
 			String dataFlowName = "identity";
-			String wukongDir = "/home/arrawatia/tv/";
+			String wukongDir = ExampleConfig.getString("wukong.dir");
 			String env = "production";
-			System.setProperty("wukong.command", "bash -c bundle exec wu-bolt identity");
+			
+			System.setProperty("wukong.command", ExampleConfig.getString("wukong.command"));
 			Stream wukong = combine.each(new Fields("str"), new WuFunction(dataFlowName, wukongDir, env), new Fields("_wukong")).parallelismHint(wukongParallelism);
 
 			wukong.partitionPersist(new KafkaState.Factory(kafkaTopic, zkHosts), new Fields("_wukong"), new KafkaState.Updater());
